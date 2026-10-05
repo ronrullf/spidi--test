@@ -1,15 +1,30 @@
 # 🛒 Sistema de Pagos SPIDI & Panel de Ventas WhatsApp con Factura Digital y MRW
 
-Implementación integral de pasarela de pagos con **SPIDI** (Banco Sofitasa / Pagos Móviles C2P / Débito Inmediato en Venezuela) compuesta por dos soluciones independientes construidas sobre Node.js nativo sin dependencias externas:
+Implementación integral de pasarela de pagos con **SPIDI** (Banco Sofitasa / Pagos Móviles C2P / Débito Inmediato en Venezuela) con arquitectura unificada lista para despliegue en **Vercel** o ejecución local sobre Node.js nativo sin dependencias externas:
 
-1. **Kiosco de Autopago (Puerto 3000):** Pantalla para puntos de venta físicos o autoservicio con soporte para pago directo o vía Código QR móvil sincronizado en tiempo real.
-2. **Panel de Ventas & Cobros por WhatsApp (Puerto 3001):** Panel para vendedores donde seleccionan productos, generan enlaces de verificación en doble moneda (USD y Bs. al cambio oficial BCV), redirigen al pago SPIDI y finalmente a una **Factura Digital** con formulario de encomiendas **MRW** y botón para despachar todo el reporte por WhatsApp en 1 clic.
+1. **Kiosco de Autopago (`/autopago` o `/`):** Pantalla para puntos de venta físicos o autoservicio con soporte para pago directo en pantalla o vía Código QR móvil sincronizado en tiempo real.
+2. **Panel Admin de Ventas por WhatsApp (`/admin`):** Panel para vendedores donde seleccionan productos, generan enlaces de verificación en doble moneda (USD y Bs. al cambio oficial BCV), redirigen al pago SPIDI y finalmente a una **Factura Digital** con formulario de encomiendas **MRW** y botón para despachar todo el reporte por WhatsApp en 1 clic.
+
+---
+
+## 🌐 Rutas Disponibles (Tanto en Vercel como en Local)
+
+Cuando lo despliegues en **Vercel** tendrás enlaces independientes para cada función bajo tu propio dominio:
+
+| Módulo / Función | Ruta en Vercel / Producción | Ruta en Localhost |
+| :--- | :--- | :--- |
+| 🛒 **Kiosco de Autopago** | `https://tu-app.vercel.app/autopago` (o `/`) | `http://localhost:3000/autopago` |
+| 📦 **Admin Creación de Links** | `https://tu-app.vercel.app/admin` | `http://localhost:3000/admin` |
+| 🔍 **Verificación Previa Cliente** | `https://tu-app.vercel.app/checkout?order_id=...` | `http://localhost:3000/checkout?order_id=...` |
+| 🧾 **Factura Digital & MRW** | `https://tu-app.vercel.app/factura?order_id=...` | `http://localhost:3000/factura?order_id=...` |
+| ❌ **Manejo de Error Bancario** | `https://tu-app.vercel.app/error-pago?order_id=...` | `http://localhost:3000/error-pago?order_id=...` |
+| ⚡ **API Serverless Unificada** | `https://tu-app.vercel.app/api/...` | `http://localhost:3000/api/...` |
 
 ---
 
 ## 🌟 Características Principales
 
-### 🛒 1. Kiosco de Autopago (`http://localhost:3000`)
+### 🛒 1. Kiosco de Autopago (`/autopago`)
 - **Catálogo Interactivo:** Selección rápida de productos de consumo masivo con desglose de ítems y precios.
 - **Doble Modalidad de Pago:**
   - **Pago en Kiosco:** Ingreso de credenciales bancarias (Banco, Cédula, Teléfono, OTP C2P).
@@ -22,14 +37,14 @@ Implementación integral de pasarela de pagos con **SPIDI** (Banco Sofitasa / Pa
 
 ---
 
-### 📦 2. Panel Admin & Ventas por WhatsApp (`http://localhost:3001`)
+### 📦 2. Panel Admin & Ventas por WhatsApp (`/admin`)
 - **Armado de Pedidos y Cotización Oficial:**
   - Selección de productos y cantidades.
   - Conversión automática a Bolívares usando la **Tasa Oficial del Banco Central de Venezuela (BCV)**.
-- **Subpágina de Verificación Previa (`checkout.html`):**
+- **Subpágina de Verificación Previa (`/checkout`):**
   - El cliente recibe el enlace por WhatsApp y visualiza el detalle antes de procesar el pago.
   - Muestra el monto total en **USD ($)** y en **Bs.**
-- **Redirección a Factura Digital (`factura.html`):**
+- **Redirección a Factura Digital (`/factura`):**
   - Sello oficial de aprobación bancaria respaldado por SPIDI y Banco Sofitasa.
   - Referencia bancaria, fecha, hora y lista de productos comprados.
   - Formulario de encomienda **MRW**: Destinatario, Cédula, Teléfono, Estado, Ciudad y Agencia MRW de destino.
@@ -38,27 +53,35 @@ Implementación integral de pasarela de pagos con **SPIDI** (Banco Sofitasa / Pa
 
 ---
 
-## 🚀 Puesta en Marcha
+## 🚀 Despliegue en Vercel
+
+Este proyecto ya incluye `vercel.json` y `api/index.js` preconfigurados para Vercel:
+
+1. Haz un push a tu repositorio en GitHub (o conecta tu cuenta de GitHub con Vercel).
+2. En [Vercel](https://vercel.com), presiona **"Add New Project"** e importa el repositorio `ronrullf/spidi--test`.
+3. Haz clic en **"Deploy"** (no requiere configuración de build ni dependencias adicionales).
+4. ¡Listo! Vercel te dará una URL como `https://spidi--test.vercel.app` donde:
+   - `https://spidi--test.vercel.app/autopago` será tu Kiosco.
+   - `https://spidi--test.vercel.app/admin` será tu Panel de Enlaces para WhatsApp.
+
+---
+
+## 💻 Ejecución Local
 
 ### Requisitos
 - **Node.js** (v16 o superior).
 - No requiere `npm install` (arquitectura de cero dependencias con módulos nativos de Node.js).
 
-### Ejecución de los Servicios
+### Iniciar Servidor Unificado Local
 
 ```bash
-# Iniciar Kiosco de Autopago (Puerto 3000)
 node server.js
-
-# Iniciar Panel Administrativo & WhatsApp (Puerto 3001)
-node server-admin.js
 ```
 
-O usando los scripts de `npm`:
+O usando npm:
 
 ```bash
-npm run start:kiosk
-npm run start:admin
+npm start
 ```
 
 ---
@@ -80,20 +103,22 @@ En el entorno de pruebas de SPIDI (`sim.mispidi.com`), puedes probar los diferen
 
 ```
 spidi/
-├── server.js                 # Servidor del Kiosco de Autopago (Puerto 3000)
-├── server-admin.js           # Servidor del Admin, WhatsApp & Facturación (Puerto 3001)
+├── api/
+│   └── index.js              # Entrypoint Serverless para Vercel
+├── vercel.json               # Configuración de rutas y rewrites para Vercel
+├── server.js                 # Servidor Maestro Unificado (Autopago + Admin + APIs)
+├── server-admin.js           # Servidor alternativo para puerto 3001
 ├── package.json              # Configuración y comandos de ejecución
-├── .gitignore                # Archivos ignorados por git
-├── public/                   # Frontend del Kiosco (Puerto 3000)
-│   ├── index.html            # Pantalla principal del autoservicio y QR
-│   ├── resultado.html        # Pantalla de éxito / fallo con explicaciones bancarias
-│   └── chat.html             # Interfaz de cobro alternativo
-└── public-admin/             # Frontend del Admin y Clientes (Puerto 3001)
-    ├── index.html            # Panel de control de ventas y pedidos
-    ├── checkout.html         # Subpágina de verificación para el cliente
-    ├── factura.html          # Factura Digital + Formulario MRW + Botón WhatsApp
-    ├── error-pago.html       # Manejo amigable de errores bancarios con 1-clic retry
-    └── envio.html            # Registro de encomiendas
+├── .gitignore                # Filtro de archivos git
+└── public/                   # Frontend estático unificado
+    ├── index.html            # Kiosco de Autopago (raíz /)
+    ├── autopago.html         # Kiosco de Autopago (/autopago)
+    ├── admin.html            # Panel Administrativo de WhatsApp (/admin)
+    ├── checkout.html         # Subpágina de verificación para el cliente (/checkout)
+    ├── factura.html          # Factura Digital + Envíos MRW + WhatsApp (/factura)
+    ├── error-pago.html       # Manejo amigable de errores bancarios (/error-pago)
+    ├── resultado.html        # Pantalla de resultado del Kiosco (/resultado)
+    └── chat.html             # Interfaz de cobro alternativo
 ```
 
 ---

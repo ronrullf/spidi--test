@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error en el Pago · SPIDI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f8fafc; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 16px; }
+
+    .error-card {
+      background: white;
+      border-radius: 24px;
+      max-width: 480px;
+      width: 100%;
+      padding: 32px 28px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06), 0 8px 10px -6px rgba(0,0,0,0.02);
+      border: 1px solid #fee2e2;
+      text-align: center;
+      animation: pop 0.25s ease-out;
+    }
+    @keyframes pop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .error-icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #fee2e2;
+      color: #dc2626;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 16px;
+    }
+
+    .error-title { font-size: 20px; font-weight: 800; color: #b91c1c; margin-bottom: 6px; }
+    .error-subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+    /* Caja de Razón del Banco */
+    .reason-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .reason-badge {
+      display: inline-block;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .reason-headline { font-size: 16px; font-weight: 700; color: #991b1b; margin-bottom: 4px; }
+    .reason-text { font-size: 13px; color: #7f1d1d; line-height: 1.4; }
+
+    .order-summary {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .summary-row { display: flex; justify-content: space-between; padding: 4px 0; }
+
+    .btn-retry {
+      background: #0047FF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 800;
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,71,255,0.25);
+      transition: background 0.15s ease;
+    }
+    .btn-retry:hover { background: #0036cc; }
+
+    .btn-back {
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 12px;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="error-card">
+    <div class="error-icon-box">✕</div>
+    <h2 class="error-title">Pago No Procesado</h2>
+    <p class="error-subtitle">El banco no autorizó el débito para este pedido.</p>
+
+    <div class="reason-box">
+      <div class="reason-badge" id="errorBadge">RECHAZO BANCARIO</div>
+      <div class="reason-headline" id="errorHeadline">Clave incorrecta o saldo insuficiente</div>
+      <div class="reason-text" id="errorExplanation">
+        Verifica tus credenciales bancarias e intenta nuevamente.
+      </div>
+    </div>
+
+    <div class="order-summary">
+      <div class="summary-row">
+        <span style="color:#64748b;">N° Orden:</span>
+        <strong id="summaryOrderId">ORD-0000</strong>
+      </div>
+      <div class="summary-row">
+        <span style="color:#64748b;">Monto:</span>
+        <strong id="summaryAmount">$0.00 USD</strong>
+      </div>
+      <div class="summary-row">
+        <span style="color:#64748b;">Cliente:</span>
+        <strong id="summaryClient">Cliente</strong>
+      </div>
+    </div>
+
+    <button class="btn-retry" id="btnRetry" onclick="reintentarPago()">
+      🔄 Reintentar Pago Ahora
+    </button>
+
+    <button class="btn-back" onclick="location.href='/admin'">
+      Regresar al Panel Admin
+    </button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('order_id') || params.get('ref') || '';
+    const sessionId = params.get('session_id') || '';
+    let currentOrder = null;
+
+    async function cargarDetallesError() {
+      const idToQuery = orderId || sessionId;
+      if (!idToQuery) return;
+
+      try {
+        const res = await fetch(`/api/order-status/${encodeURIComponent(idToQuery)}`);
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        currentOrder = json.data;
+        document.getElementById('summaryOrderId').textContent = currentOrder.orderId || orderId;
+        document.getElementById('summaryAmount').textContent = `$${Number(currentOrder.amount).toFixed(2)} USD`;
+        document.getElementById('summaryClient').textContent = currentOrder.clientName || 'Cliente';
+
+        const payment = currentOrder.session_payment || {};
+        const reason = payment.reason || '';
+        const userMessage = payment.user_message || '';
+
+        const badge = document.getElementById('errorBadge');
+        const headline = document.getElementById('errorHeadline');
+        const explanation = document.getElementById('errorExplanation');
+
+        if (reason === 'insufficient_funds' || userMessage.toLowerCase().includes('fondos') || userMessage.toLowerCase().includes('saldo')) {
+          badge.textContent = 'ERROR 111111 · SALDO INSUFICIENTE';
+          headline.textContent = 'Fondos Insuficientes en Cuenta';
+          explanation.textContent = 'Tu cuenta bancaria no dispone del saldo necesario para cubrir el monto de $' + Number(currentOrder.amount).toFixed(2) + ' USD. Puedes recargar saldo o intentar con otra cuenta.';
+        } else if (reason === 'invalid_otp' || userMessage.toLowerCase().includes('clave') || userMessage.toLowerCase().includes('otp')) {
+          badge.textContent = 'ERROR 222222 · CLAVE INCORRECTA';
+          headline.textContent = 'Clave de Pago (OTP) Inválida';
+          explanation.textContent = 'La clave dinámica u OTP ingresada no coincide con la generada por tu banco. Solicita una nueva clave temporal e ingrésala nuevamente.';
+        } else if (reason === 'bank_limit' || userMessage.toLowerCase().includes('límite')) {
+          badge.textContent = 'ERROR 333333 · LÍMITE EXCEDIDO';
+          headline.textContent = 'Límite Máximo Bancario Superado';
+          explanation.textContent = 'La operación supera el límite diario configurado por tu entidad financiera para transferencias y pagos móviles.';
+        } else {
+          badge.textContent = 'TRANSACCIÓN RECHAZADA';
+          headline.textContent = userMessage || 'Débito No Autorizado';
+          explanation.textContent = 'El banco rechazó la operación. Por favor revisa los datos e intenta nuevamente.';
+        }
+
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function reintentarPago() {
+      const btn = document.getElementById('btnRetry');
+      btn.disabled = true;
+      btn.innerHTML = '🔄 Generando nuevo enlace...';
+
+      try {
+        const res = await fetch('/api/retry-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: orderId || (currentOrder && currentOrder.orderId),
+            session_id: sessionId || (currentOrder && currentOrder.sessionId)
+          })
+        });
+
+        const json = await res.json();
+        if (!json.success || !json.data || !json.data.paymentUrl) {
+          throw new Error(json.error || 'No se pudo regenerar el link');
+        }
+
+        // Redirigir de inmediato al nuevo formulario de pago de SPIDI
+        window.location.href = json.data.paymentUrl;
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '🔄 Reintentar Pago Ahora';
+      }
+    }
+
+    cargarDetallesError();
+  </script>
+</body>
+</html>

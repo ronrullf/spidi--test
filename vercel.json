@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/autopago", "destination": "/autopago.html" },
+    { "source": "/kiosco", "destination": "/autopago.html" },
+    { "source": "/checkout", "destination": "/checkout.html" },
+    { "source": "/factura", "destination": "/factura.html" },
+    { "source": "/error-pago", "destination": "/error-pago.html" },
+    { "source": "/resultado", "destination": "/resultado.html" },
+    { "source": "/envio", "destination": "/factura.html" }
+  ]
+}
