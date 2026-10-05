@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datos de Envío MRW · Mi Tienda</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f8fafc; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 16px; }
+
+    .shipping-card {
+      background: white;
+      border-radius: 24px;
+      max-width: 540px;
+      width: 100%;
+      padding: 32px 28px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06), 0 8px 10px -6px rgba(0,0,0,0.02);
+      border: 1px solid #e2e8f0;
+      animation: pop 0.25s ease-out;
+    }
+    @keyframes pop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* Banner de Pago Verificado */
+    .success-badge-banner {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .check-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #10b981;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 10px;
+      box-shadow: 0 4px 10px rgba(16,185,129,0.3);
+    }
+    .success-badge-banner h2 { font-size: 19px; font-weight: 800; color: #065f46; margin-bottom: 4px; }
+    .success-badge-banner p { font-size: 13px; color: #047857; }
+
+    .payment-summary-pill {
+      display: flex;
+      justify-content: space-around;
+      background: white;
+      border: 1px dashed #6ee7b7;
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #065f46;
+    }
+
+    /* Formulario */
+    .form-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 8px;
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; }
+    .form-input, .form-select {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+      background: white;
+    }
+    .form-input:focus, .form-select:focus { border-color: #0047FF; box-shadow: 0 0 0 2px rgba(0,71,255,0.15); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .btn-submit-shipping {
+      background: #0047FF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 800;
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      box-shadow: 0 4px 12px rgba(0,71,255,0.25);
+    }
+    .btn-submit-shipping:hover { background: #0036cc; }
+
+    /* Pantalla de Guía Emitida */
+    .waybill-box {
+      background: #f8fafc;
+      border: 2px dashed #94a3b8;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+    .waybill-number { font-size: 26px; font-weight: 900; color: #0047FF; letter-spacing: 1px; margin: 8px 0; }
+    .waybill-details {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 16px 0;
+      text-align: left;
+      font-size: 13px;
+    }
+    .waybill-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dotted #e2e8f0; }
+    .waybill-row:last-child { border-bottom: none; }
+  </style>
+</head>
+<body>
+
+  <div class="shipping-card">
+    
+    <!-- BANNER DE PAGO CONFIRMADO -->
+    <div class="success-badge-banner">
+      <div class="check-icon">✓</div>
+      <h2>🎉 ¡Pago Verificado por SPIDI!</h2>
+      <p>Tu débito fue procesado con éxito. Ahora ingresa tus datos para el despacho.</p>
+
+      <div class="payment-summary-pill">
+        <div><strong>Monto:</strong> <span id="summaryAmount">$0.00 USD</span></div>
+        <div><strong>Ref. SPIDI:</strong> <span id="summaryBankRef">3189</span></div>
+        <div><strong>Orden:</strong> <span id="summaryOrderId">ORD-0000</span></div>
+      </div>
+    </div>
+
+    <!-- FORMULARIO DE ENVÍO MRW / COURIER -->
+    <div id="shippingFormSection">
+      <div class="form-title">
+        <span>🚚 Datos de Envío y Destino</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Empresa de Encomienda</label>
+        <select id="courierSelect" class="form-select">
+          <option value="MRW" selected>MRW (Recomendado - Red Nacional)</option>
+          <option value="Zoom">Grupo Zoom</option>
+          <option value="Tealca">Tealca</option>
+          <option value="Domesa">Domesa</option>
+          <option value="Delivery Local">Delivery en Moto (Área Metropolitana)</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre del Destinatario</label>
+          <input type="text" id="recipientName" class="form-input" placeholder="Nombre y Apellido">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cédula de Identidad</label>
+          <input type="text" id="recipientId" class="form-input" placeholder="V-12345678">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Teléfono de Contacto</label>
+          <input type="text" id="recipientPhone" class="form-input" placeholder="04121234567">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Modalidad de Entrega</label>
+          <select id="deliveryType" class="form-select">
+            <option value="Retiro en Agencia" selected>Retiro en Agencia (Cobro en Destino)</option>
+            <option value="Entrega a Domicilio">Entrega a Domicilio</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <select id="stateSelect" class="form-select">
+            <option value="Distrito Capital" selected>Distrito Capital (Caracas)</option>
+            <option value="Miranda">Miranda</option>
+            <option value="Carabobo">Carabobo</option>
+            <option value="Aragua">Aragua</option>
+            <option value="Zulia">Zulia</option>
+            <option value="Lara">Lara</option>
+            <option value="Anzoátegui">Anzoátegui</option>
+            <option value="Táchira">Táchira</option>
+            <option value="Bolívar">Bolívar</option>
+            <option value="Otro">Otro Estado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ciudad / Municipio</label>
+          <input type="text" id="cityInput" class="form-input" placeholder="Ej: Chacao / Valencia" value="Caracas">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Agencia MRW o Dirección Exacta</label>
+        <input type="text" id="agencyAddress" class="form-input" placeholder="Ej: Agencia MRW Chacao 0102, Av. Francisco de Miranda" value="Agencia MRW Principal">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notas Adicionales (Opcional)</label>
+        <input type="text" id="notesInput" class="form-input" placeholder="Punto de referencia o instrucciones">
+      </div>
+
+      <button class="btn-submit-shipping" id="btnSubmitShipping" onclick="guardarDatosEnvio()">
+        📦 Confirmar y Registrar Envío
+      </button>
+    </div>
+
+    <!-- PANTALLA RESULTADO: GUÍA DE DESPACHO MRW -->
+    <div class="waybill-box" id="waybillBox">
+      <div style="font-size: 38px;">🚚</div>
+      <h3 style="font-size: 19px; font-weight: 800; color: #0f172a;">¡Envío Registrado Exitosamente!</h3>
+      <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Tu paquete ha sido asignado para despacho.</p>
+
+      <div class="waybill-number" id="waybillNumber">MRW-123456</div>
+
+      <div class="waybill-details">
+        <div class="waybill-row">
+          <span style="color:#64748b;">Empresa:</span>
+          <strong id="wbCourier">MRW</strong>
+        </div>
+        <div class="waybill-row">
+          <span style="color:#64748b;">Destinatario:</span>
+          <strong id="wbRecipient">-</strong>
+        </div>
+        <div class="waybill-row">
+          <span style="color:#64748b;">Destino:</span>
+          <strong id="wbDestination">-</strong>
+        </div>
+        <div class="waybill-row">
+          <span style="color:#64748b;">Modalidad:</span>
+          <strong id="wbType">-</strong>
+        </div>
+        <div class="waybill-row">
+          <span style="color:#64748b;">Pago Verificado:</span>
+          <strong style="color:#16a34a;">SPIDI (Aprobado)</strong>
+        </div>
+      </div>
+
+      <button class="btn-submit-shipping" style="background:#0f172a;" onclick="window.print()">
+        🖨️ Imprimir Guía de Despacho
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('order_id') || params.get('ref') || '';
+    const sessionId = params.get('session_id') || '';
+    let currentOrder = null;
+
+    async function cargarDetalles() {
+      const idToQuery = orderId || sessionId;
+      if (!idToQuery) return;
+
+      try {
+        const res = await fetch(`/api/order-status/${encodeURIComponent(idToQuery)}`);
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        currentOrder = json.data;
+        document.getElementById('summaryOrderId').textContent = currentOrder.orderId || orderId;
+        document.getElementById('summaryAmount').textContent = `$${Number(currentOrder.amount).toFixed(2)} USD`;
+        
+        if (currentOrder.clientName) {
+          document.getElementById('recipientName').value = currentOrder.clientName;
+        }
+        if (currentOrder.clientPhone) {
+          document.getElementById('recipientPhone').value = currentOrder.clientPhone;
+        }
+
+        const payment = currentOrder.session_payment || {};
+        const credits = (payment.receiver_credits && payment.receiver_credits.owner) || {};
+        document.getElementById('summaryBankRef').textContent = credits.spidi_credit_id || credits.bank_reference_id || '3189';
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function guardarDatosEnvio() {
+      const btn = document.getElementById('btnSubmitShipping');
+      btn.disabled = true;
+      btn.textContent = 'Guardando datos...';
+
+      const courier = document.getElementById('courierSelect').value;
+      const recipientName = document.getElementById('recipientName').value.trim() || 'Cliente';
+      const recipientId = document.getElementById('recipientId').value.trim() || 'V-12345678';
+      const recipientPhone = document.getElementById('recipientPhone').value.trim() || '04121234567';
+      const deliveryType = document.getElementById('deliveryType').value;
+      const state = document.getElementById('stateSelect').value;
+      const city = document.getElementById('cityInput').value.trim() || 'Caracas';
+      const agencyAddress = document.getElementById('agencyAddress').value.trim() || 'Agencia MRW';
+      const notes = document.getElementById('notesInput').value.trim();
+
+      try {
+        const res = await fetch('/api/save-shipping', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: orderId || (currentOrder && currentOrder.orderId),
+            session_id: sessionId || (currentOrder && currentOrder.sessionId),
+            courier: courier,
+            recipient_name: recipientName,
+            recipient_id: recipientId,
+            recipient_phone: recipientPhone,
+            delivery_type: deliveryType,
+            state: state,
+            city: city,
+            agency_address: agencyAddress,
+            notes: notes
+          })
+        });
+
+        const json = await res.json();
+        if (!json.success || !json.data) throw new Error(json.error || 'Error al guardar envío');
+
+        // Mostrar pantalla de Guía Emitida
+        document.getElementById('shippingFormSection').style.display = 'none';
+        document.getElementById('waybillBox').style.display = 'block';
+
+        document.getElementById('waybillNumber').textContent = json.data.guideNumber;
+        document.getElementById('wbCourier').textContent = courier;
+        document.getElementById('wbRecipient').textContent = `${recipientName} (${recipientId})`;
+        document.getElementById('wbDestination').textContent = `${city}, ${state} - ${agencyAddress}`;
+        document.getElementById('wbType').textContent = deliveryType;
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = '📦 Confirmar y Registrar Envío';
+      }
+    }
+
+    cargarDetalles();
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "spidi-test",
+  "version": "1.0.0",
+  "description": "Sistema de Kiosco Autopago SPIDI y Panel de Cobro por WhatsApp con Factura Digital y Envíos MRW",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:kiosk": "node server.js",
+    "start:admin": "node server-admin.js"
+  },
+  "keywords": [
+    "spidi",
+    "pago-movil",
+    "c2p",
+    "venezuela",
+    "mrw",
+    "whatsapp",
+    "bcv"
+  ],
+  "author": "ronrullf",
+  "license": "MIT"
+}

@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Factura & Envío MRW · Mi Tienda</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f1f5f9; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; }
+
+    .invoice-wrapper {
+      max-width: 560px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* La Factura Digital */
+    .invoice-card {
+      background: white;
+      border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.06), 0 8px 10px -6px rgba(0,0,0,0.03);
+      border: 1px solid #e2e8f0;
+      position: relative;
+    }
+
+    .invoice-badge-ok {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #86efac;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+    }
+    .invoice-header h2 { font-size: 19px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; }
+    .invoice-header p { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .invoice-meta { text-align: right; font-size: 12px; color: #475569; }
+    .invoice-meta strong { font-size: 14px; color: #0047FF; font-family: monospace; }
+
+    /* Tabla de Productos */
+    .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+    .invoice-table th { text-align: left; padding: 8px 0; border-bottom: 1px solid #0f172a; font-size: 11px; color: #64748b; text-transform: uppercase; }
+    .invoice-table td { padding: 8px 0; border-bottom: 1px dotted #e2e8f0; }
+    .invoice-table .col-r { text-align: right; }
+
+    /* Totales */
+    .totals-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .total-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; color: #475569; }
+    .total-row.main {
+      font-size: 18px;
+      font-weight: 900;
+      color: #0f172a;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 8px;
+      margin-top: 6px;
+    }
+    .total-ves-val { color: #0284c7; }
+
+    /* Info Bancaria SPIDI */
+    .bank-info-grid {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #1e3a8a;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    /* SECCIÓN DE DATOS DE ENVÍO MRW */
+    .shipping-section {
+      background: #fff;
+      border-radius: 20px;
+      padding: 24px;
+      border: 2px solid #fed7aa;
+      box-shadow: 0 4px 12px rgba(251, 146, 60, 0.1);
+    }
+    .shipping-section-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #c2410c;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .shipping-section-desc {
+      font-size: 12px;
+      color: #7c2d12;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .form-group { margin-bottom: 12px; text-align: left; }
+    .form-label { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .form-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 13px;
+      outline: none;
+      background: white;
+    }
+    .form-input:focus { border-color: #ea580c; box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.15); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* BOTONES */
+    .btn-whatsapp-send {
+      background: #25d366;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 15px;
+      font-weight: 800;
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      text-decoration: none;
+      margin-top: 14px;
+      box-shadow: 0 4px 14px rgba(37,211,102,0.4);
+      transition: all 0.15s ease;
+    }
+    .btn-whatsapp-send:hover { background: #1eb857; transform: translateY(-1px); }
+
+    .action-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .btn-sub-action {
+      background: none;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      background: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-sub-action:hover { background: #f8fafc; color: #0f172a; }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .shipping-section, .btn-whatsapp-send, .action-links { display: none !important; }
+      .invoice-card { box-shadow: none; border: none; padding: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="invoice-wrapper">
+
+    <!-- TARJETA DE FACTURA / COMPROBANTE -->
+    <div class="invoice-card" id="invoiceCard">
+      
+      <!-- Badge de Pago Verificado -->
+      <div class="invoice-badge-ok">
+        ✓ PAGO BANCARIO VERIFICADO & ACREDITADO POR SPIDI
+      </div>
+
+      <!-- Cabecera de la Factura -->
+      <div class="invoice-header">
+        <div>
+          <h2>MI TIENDA C.A.</h2>
+          <p>RIF: J-50733628-0 · Comprobante Electrónico</p>
+          <p id="invoiceDate">Fecha: 05/10/2026 18:25</p>
+        </div>
+        <div class="invoice-meta">
+          <div>Control / Orden:</div>
+          <strong id="invoiceOrderId">ORD-0000</strong>
+        </div>
+      </div>
+
+      <!-- Tabla de Productos -->
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>CANT / PRODUCTO</th>
+            <th class="col-r">P.UNIT</th>
+            <th class="col-r">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody id="invoiceItemsBody">
+          <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Cargando factura...</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Totales Doble Moneda -->
+      <div class="totals-box">
+        <div class="total-row">
+          <span>Subtotal:</span>
+          <span id="invoiceSubtotal">$0.00 USD</span>
+        </div>
+        <div class="total-row">
+          <span>Tasa Oficial BCV:</span>
+          <span id="invoiceBcvRate">Bs. 37.50 / USD</span>
+        </div>
+        <div class="total-row main">
+          <span>TOTAL APROBADO:</span>
+          <div>
+            <span id="invoiceTotalUsd">$0.00 USD</span>
+            <div style="font-size:13px; text-align:right;" class="total-ves-val" id="invoiceTotalVes">Bs. 0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos de Transacción SPIDI -->
+      <div class="bank-info-grid">
+        <div><strong>PASARELA:</strong> SPIDI / Bco. Sofitasa</div>
+        <div><strong>REF. PAGO:</strong> <span id="bankRefVal">3189</span></div>
+        <div><strong>MÉTODO:</strong> <span id="bankMethodVal">Pago Móvil C2P</span></div>
+        <div><strong>PAGADOR:</strong> <span id="bankPayerVal">Cliente</span></div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN DE ENVÍO MRW & ENVÍO POR WHATSAPP -->
+    <div class="shipping-section">
+      <div class="shipping-section-title">
+        <span>🚚 Envío MRW / Encomienda</span>
+      </div>
+      <p class="shipping-section-desc">
+        Completa tus datos de destino abajo. Al presionar el botón verde se abrirá WhatsApp con tu <strong>factura y datos de envío listos en un solo mensaje</strong> para que la tienda procese tu despacho.
+      </p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Destinatario (Nombre Completo)</label>
+          <input type="text" id="mrwRecipient" class="form-input" placeholder="Nombre y Apellido">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cédula de Identidad</label>
+          <input type="text" id="mrwId" class="form-input" placeholder="V-12345678">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Teléfono de Contacto</label>
+          <input type="text" id="mrwPhone" class="form-input" placeholder="04121234567">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empresa</label>
+          <input type="text" id="mrwCourier" class="form-input" value="MRW" readonly style="background:#f8fafc; font-weight:700;">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <input type="text" id="mrwState" class="form-input" placeholder="Distrito Capital / Carabobo / etc." value="Distrito Capital">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ciudad</label>
+          <input type="text" id="mrwCity" class="form-input" placeholder="Caracas / Valencia / etc." value="Caracas">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Agencia MRW de Destino (Código o Dirección)</label>
+        <input type="text" id="mrwAgency" class="form-input" placeholder="Ej: Agencia MRW Chacao 0102, Av. Francisco de Miranda" value="Agencia MRW Chacao 0102">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">WhatsApp de la Tienda (Donde se enviará el reporte)</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="storePhoneInput" class="form-input" placeholder="Ej: 04121234567" value="04121234567">
+          <button type="button" class="btn-sub-action" onclick="limpiarDestinoWhatsApp()" title="Enviar sin número predeterminado (abrirá selector de contactos en WhatsApp)">
+            Elegir Contacto
+          </button>
+        </div>
+        <small style="color:#64748b; font-size:11px; margin-top:3px; display:block;">
+          La factura y datos de MRW se enviarán por WhatsApp a este número de la tienda.
+        </small>
+      </div>
+
+      <!-- Feedback de Envío -->
+      <div id="waFeedbackBox" style="display:none; background:#ecfdf5; border:1px solid #6ee7b7; color:#065f46; border-radius:10px; padding:10px 14px; font-size:12px; margin-top:10px; font-weight:600;">
+        ✓ ¡Datos registrados! Se ha abierto WhatsApp con tu comprobante y datos de envío.
+      </div>
+
+      <!-- BOTÓN PRINCIPAL DE WHATSAPP -->
+      <button class="btn-whatsapp-send" id="btnSendWA" onclick="enviarReportePorWhatsApp()">
+        📲 Enviar Factura y Datos MRW por WhatsApp
+      </button>
+
+      <!-- ACCIONES SECUNDARIAS -->
+      <div class="action-links">
+        <button class="btn-sub-action" onclick="copiarReporteTexto()">
+          📋 Copiar Mensaje
+        </button>
+        <button class="btn-sub-action" onclick="window.print()">
+          🖨️ Imprimir Factura
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get('order_id') || params.get('ref') || '';
+    const sessionId = params.get('session_id') || '';
+    let currentOrder = null;
+
+    async function cargarFactura() {
+      const idToQuery = orderId || sessionId;
+      if (!idToQuery) return;
+
+      try {
+        const res = await fetch(`/api/order-status/${encodeURIComponent(idToQuery)}`);
+        const json = await res.json();
+        if (!json.success || !json.data) throw new Error(json.message || 'Orden no encontrada');
+
+        currentOrder = json.data;
+
+        document.getElementById('invoiceOrderId').textContent = currentOrder.orderId || orderId;
+        document.getElementById('invoiceDate').textContent = 'Fecha: ' + new Date().toLocaleString('es-VE');
+
+        // Totales y BCV
+        const usd = Number(currentOrder.amount || 0);
+        const rate = Number(currentOrder.bcvRate || 37.50);
+        const ves = currentOrder.amountVes ? Number(currentOrder.amountVes) : Number((usd * rate).toFixed(2));
+
+        document.getElementById('invoiceSubtotal').textContent = `$${usd.toFixed(2)} USD`;
+        document.getElementById('invoiceBcvRate').textContent = `Bs. ${rate.toFixed(2)} / USD`;
+        document.getElementById('invoiceTotalUsd').textContent = `$${usd.toFixed(2)} USD`;
+        document.getElementById('invoiceTotalVes').textContent = `Bs. ${ves.toFixed(2)}`;
+
+        // Datos SPIDI
+        const payment = currentOrder.session_payment || {};
+        const credits = (payment.receiver_credits && payment.receiver_credits.owner) || {};
+        const details = payment.payment_details || {};
+
+        document.getElementById('bankRefVal').textContent = credits.spidi_credit_id || credits.bank_reference_id || '3189';
+        document.getElementById('bankMethodVal').textContent = payment.payment_method === 'mobile_payment' ? 'Pago Móvil C2P' : 'Débito Inmediato';
+        document.getElementById('bankPayerVal').textContent = details.nombre ? `${details.nombre} (${details.cedula || ''})` : (currentOrder.clientName || 'Cliente');
+
+        // Precargar en el formulario MRW
+        document.getElementById('mrwRecipient').value = currentOrder.clientName || '';
+        document.getElementById('mrwPhone').value = currentOrder.clientPhone || '';
+        document.getElementById('mrwId').value = details.cedula ? `${details.tipo || 'V'}-${details.cedula}` : 'V-';
+
+        if (currentOrder.storePhone) {
+          document.getElementById('storePhoneInput').value = currentOrder.storePhone;
+        }
+
+        // Renderizar tabla de productos
+        const tbody = document.getElementById('invoiceItemsBody');
+        tbody.innerHTML = '';
+        const items = currentOrder.items || [];
+
+        if (items.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td><strong>1x</strong> ${currentOrder.description || 'Orden de Compra'}</td>
+              <td class="col-r">$${usd.toFixed(2)}</td>
+              <td class="col-r"><strong>$${usd.toFixed(2)}</strong></td>
+            </tr>
+          `;
+        } else {
+          items.forEach(it => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td><strong>${it.qty}x</strong> ${it.name}</td>
+              <td class="col-r">$${it.price.toFixed(2)}</td>
+              <td class="col-r"><strong>$${(it.price * it.qty).toFixed(2)}</strong></td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function limpiarDestinoWhatsApp() {
+      const input = document.getElementById('storePhoneInput');
+      input.value = '';
+      input.placeholder = 'Abriendo selector de chat en WhatsApp...';
+      input.focus();
+    }
+
+    function construirTextoWhatsApp() {
+      const recipient = document.getElementById('mrwRecipient').value.trim() || (currentOrder && currentOrder.clientName) || 'Cliente';
+      const idNumber = document.getElementById('mrwId').value.trim() || 'V-';
+      const phone = document.getElementById('mrwPhone').value.trim() || (currentOrder && currentOrder.clientPhone) || '';
+      const state = document.getElementById('mrwState').value.trim() || 'Distrito Capital';
+      const city = document.getElementById('mrwCity').value.trim() || 'Caracas';
+      const agency = document.getElementById('mrwAgency').value.trim() || 'Agencia MRW Chacao 0102';
+
+      const payment = (currentOrder && currentOrder.session_payment) || {};
+      const credits = (payment.receiver_credits && payment.receiver_credits.owner) || {};
+      const refBancaria = credits.spidi_credit_id || credits.bank_reference_id || '3189';
+      const metodo = payment.payment_method === 'mobile_payment' ? 'Pago Móvil C2P' : 'Débito Inmediato';
+
+      const itemsStr = (currentOrder && currentOrder.items && currentOrder.items.length > 0)
+        ? currentOrder.items.map(i => `${i.qty}x ${i.name}`).join(', ')
+        : (currentOrder ? currentOrder.description : 'Productos varios');
+
+      const usd = Number((currentOrder && currentOrder.amount) || 0).toFixed(2);
+      const ves = currentOrder && currentOrder.amountVes ? Number(currentOrder.amountVes).toFixed(2) : (usd * 37.5).toFixed(2);
+
+      return `¡Hola! Acabo de pagar mi pedido en Mi Tienda. Aquí están los datos de mi compra y de envío:\n\n` +
+        `🧾 *COMPROBANTE DE PAGO (SPIDI):*\n` +
+        `• *N° Orden:* #${(currentOrder && currentOrder.orderId) || orderId}\n` +
+        `• *Ref. Bancaria:* ${refBancaria}\n` +
+        `• *Método:* ${metodo}\n` +
+        `• *Monto Pagado:* $${usd} USD (Bs. ${ves})\n` +
+        `• *Productos:* ${itemsStr}\n` +
+        `• *Estado:* Pago Verificado & Acreditado por SPIDI / Banco Sofitasa\n\n` +
+        `🚚 *DATOS PARA ENVÍO MRW:*\n` +
+        `• *Destinatario:* ${recipient}\n` +
+        `• *Cédula:* ${idNumber}\n` +
+        `• *Teléfono:* ${phone}\n` +
+        `• *Estado / Ciudad:* ${state}, ${city}\n` +
+        `• *Agencia MRW:* ${agency}\n` +
+        `• *Empresa:* MRW (Cobro en Destino)\n\n` +
+        `Adjunto este reporte para procesar el despacho de mi paquete. ¡Muchas gracias!`;
+    }
+
+    async function enviarReportePorWhatsApp() {
+      const recipient = document.getElementById('mrwRecipient').value.trim();
+      const phone = document.getElementById('mrwPhone').value.trim();
+      const agency = document.getElementById('mrwAgency').value.trim();
+
+      if (!recipient || !agency) {
+        alert('Por favor completa al menos el nombre del destinatario y la agencia MRW antes de enviar.');
+        return;
+      }
+
+      // Guardar en el servidor para el control del admin
+      try {
+        await fetch('/api/save-shipping', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: (currentOrder && currentOrder.orderId) || orderId,
+            courier: 'MRW',
+            recipient_name: recipient,
+            recipient_id: document.getElementById('mrwId').value.trim(),
+            recipient_phone: phone,
+            state: document.getElementById('mrwState').value.trim(),
+            city: document.getElementById('mrwCity').value.trim(),
+            agency_address: agency
+          })
+        });
+      } catch (e) {}
+
+      // Formatear teléfono destino de WhatsApp
+      let storePhoneRaw = document.getElementById('storePhoneInput').value.trim().replace(/\D/g, '');
+      let formattedStorePhone = '';
+      if (storePhoneRaw.length > 0) {
+        formattedStorePhone = storePhoneRaw.startsWith('0') ? '58' + storePhoneRaw.substring(1) : storePhoneRaw;
+      }
+
+      const mensaje = construirTextoWhatsApp();
+      let waUrl = '';
+      if (formattedStorePhone) {
+        waUrl = `https://api.whatsapp.com/send?phone=${formattedStorePhone}&text=${encodeURIComponent(mensaje)}`;
+      } else {
+        // Sin teléfono abre selector de chat en WhatsApp
+        waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+      }
+
+      // Mostrar confirmación en pantalla
+      document.getElementById('waFeedbackBox').style.display = 'block';
+
+      // Abrir WhatsApp
+      window.open(waUrl, '_blank');
+    }
+
+    function copiarReporteTexto() {
+      const mensaje = construirTextoWhatsApp();
+      navigator.clipboard.writeText(mensaje).then(() => {
+        alert('✓ Factura y datos de envío MRW copiados al portapapeles. Listo para pegar en WhatsApp.');
+      });
+    }
+
+    cargarFactura();
+  </script>
+</body>
+</html>

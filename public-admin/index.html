@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Ventas & Envíos · SPIDI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f1f5f9; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; }
+
+    header {
+      background: #0f172a;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #0047FF;
+    }
+    .header-brand { display: flex; align-items: center; gap: 10px; }
+    .header-brand h1 { font-size: 19px; font-weight: 800; }
+    .header-badge { background: #0047FF; color: white; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+
+    .header-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: #1e293b;
+      transition: all 0.15s ease;
+    }
+    .header-links a:hover { color: #fff; background: #334155; }
+
+    .main-container {
+      max-width: 1140px;
+      width: 100%;
+      margin: 24px auto;
+      padding: 0 16px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 24px;
+      flex: 1;
+    }
+    @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 22px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    /* Grid de Catálogo */
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .product-box {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .product-box:hover { border-color: #0047FF; background: #eff6ff; }
+    .product-icon { font-size: 32px; margin-bottom: 6px; }
+    .product-name { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+    .product-price { font-size: 15px; font-weight: 800; color: #0047FF; }
+    
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .btn-qty {
+      background: white;
+      border: 1px solid #cbd5e1;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-qty:hover { background: #e2e8f0; }
+    .qty-display { font-size: 14px; font-weight: 700; min-width: 20px; text-align: center; }
+
+    /* Formulario de Orden */
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; }
+    .form-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .form-input:focus { border-color: #0047FF; box-shadow: 0 0 0 2px rgba(0,71,255,0.15); }
+
+    /* Items seleccionados */
+    .selected-items {
+      min-height: 80px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 14px;
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 10px 14px;
+      border: 1px dashed #cbd5e1;
+    }
+    .selected-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 5px 0;
+      border-bottom: 1px dotted #e2e8f0;
+    }
+    .selected-row:last-child { border-bottom: none; }
+
+    .total-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 14px;
+      background: #eff6ff;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #bfdbfe;
+      color: #1e3a8a;
+    }
+
+    .btn-create-link {
+      background: #0047FF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 800;
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+      box-shadow: 0 4px 12px rgba(0,71,255,0.25);
+    }
+    .btn-create-link:hover { background: #0036cc; }
+    .btn-create-link:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    /* Tarjeta de Enlace Generado */
+    .result-card {
+      background: #ecfdf5;
+      border: 2px solid #6ee7b7;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+      animation: pop 0.2s ease-out;
+    }
+    @keyframes pop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .result-url-box {
+      background: white;
+      border: 1px solid #a7f3d0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #065f46;
+      word-break: break-all;
+      margin: 10px 0 14px;
+    }
+
+    .btn-whatsapp {
+      background: #25d366;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 10px rgba(37,211,102,0.3);
+    }
+    .btn-whatsapp:hover { background: #1eb857; }
+
+    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-secondary {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      color: #1e293b;
+    }
+    .btn-secondary:hover { background: #f8fafc; }
+
+    /* Estado de Monitoreo en Vivo */
+    .live-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+    .live-status-pill.pending { background: #fef3c7; color: #b45309; }
+    .live-status-pill.paid { background: #dcfce7; color: #15803d; }
+    .live-status-pill.failed { background: #fee2e2; color: #b91c1c; }
+
+    /* Tabla de Historial */
+    .orders-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    .orders-table th { text-align: left; background: #f8fafc; padding: 10px; border-bottom: 2px solid #e2e8f0; font-size: 11px; color: #64748b; }
+    .orders-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+
+    .badge-status { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .badge-paid { background: #dcfce7; color: #16a34a; }
+    .badge-pending { background: #fef3c7; color: #d97706; }
+    .badge-failed { background: #fee2e2; color: #dc2626; }
+    .badge-shipping { background: #e0e7ff; color: #4338ca; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-brand">
+      <h1>📦 SPIDI Admin · Ventas & Envíos</h1>
+      <span class="header-badge">Puerto 3001</span>
+    </div>
+    <div class="header-links">
+      <a href="http://localhost:3000" target="_blank">🛒 Abrir Kiosco (Puerto 3000)</a>
+    </div>
+  </header>
+
+  <div class="main-container">
+    
+    <!-- COLUMNA 1: CATÁLOGO Y HISTORIAL -->
+    <main>
+      <!-- Selección de Productos -->
+      <div class="card">
+        <div class="card-title">
+          <span>🛍️ 1. Seleccionar Gama de Productos</span>
+          <span style="font-size: 12px; color: #64748b; font-weight: normal;">Toca los botones para armar el pedido</span>
+        </div>
+
+        <div class="catalog-grid" id="catalogGrid"></div>
+      </div>
+
+      <!-- Historial de Órdenes Creadas -->
+      <div class="card">
+        <div class="card-title">
+          <span>📋 Órdenes Recientes & Estado de Envío</span>
+          <button style="background:none; border:none; color:#0047FF; font-size:12px; font-weight:700; cursor:pointer;" onclick="cargarHistorial()">🔄 Actualizar</button>
+        </div>
+
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>ORDEN</th>
+              <th>CLIENTE</th>
+              <th>TOTAL</th>
+              <th>PAGO SPIDI</th>
+              <th>ENVÍO MRW</th>
+              <th>ACCIÓN</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Cargando órdenes...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- COLUMNA 2: DETALLES DE ORDEN Y GENERADOR DE LINK -->
+    <aside>
+      <div class="card">
+        <div class="card-title">
+          <span>📝 2. Resumen & Generar Link</span>
+        </div>
+
+        <!-- Formulario del Cliente -->
+        <div class="form-group">
+          <label class="form-label">Nombre del Cliente</label>
+          <input type="text" id="clientName" class="form-input" placeholder="Ej: María Rodríguez" value="María Rodríguez">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Teléfono de WhatsApp</label>
+          <input type="text" id="clientPhone" class="form-input" placeholder="Ej: 04121234567" value="04121234567">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tipo de Enlace</label>
+          <select id="sessionType" class="form-input">
+            <option value="button" selected>Link de Pago Oficial (Redirige a MRW en éxito / Errores en fallo)</option>
+            <option value="request">Solicitud Extendida WhatsApp (Vigencia 7 días)</option>
+          </select>
+        </div>
+
+        <!-- Detalle de Productos Seleccionados -->
+        <label class="form-label">Productos Seleccionados</label>
+        <div class="selected-items" id="selectedItemsContainer">
+          <p style="color:#94a3b8; font-size:12px; text-align:center; margin-top:20px;">
+            Añade productos del catálogo izquierdo
+          </p>
+        </div>
+
+        <!-- Banner de Total -->
+        <div class="total-banner">
+          <span>Total a Cobrar:</span>
+          <span id="orderTotalDisplay">$0.00 USD</span>
+        </div>
+
+        <!-- Botón Principal -->
+        <button class="btn-create-link" id="btnCreateLink" disabled onclick="generarLinkPago()">
+          🚀 Crear Link de Pago
+        </button>
+
+        <!-- TARJETA CON LINK GENERADO -->
+        <div class="result-card" id="resultCard" style="display: none;">
+          <h4 style="color: #065f46; font-size: 15px; font-weight: 800; display:flex; justify-content:space-between;">
+            <span>✓ Link Generado Exitosamente</span>
+            <span id="resultOrderId" style="font-family:monospace; font-size:13px;">ORD-0000</span>
+          </h4>
+          <p style="font-size: 12px; color: #047857; margin-top: 4px;">
+            Mándale este enlace a tu cliente por WhatsApp:
+          </p>
+
+          <div class="result-url-box" id="resultUrlText">https://sim.mispidi.com/pay/...</div>
+
+          <!-- Botón de Envío por WhatsApp con mensaje pre-redactado -->
+          <a class="btn-whatsapp" id="btnSendWhatsApp" href="#" target="_blank">
+            📲 Enviar por WhatsApp al Cliente
+          </a>
+
+          <div class="action-row">
+            <button class="btn-secondary" onclick="copiarLinkPortapapeles()">
+              📋 Copiar Enlace
+            </button>
+            <a class="btn-secondary" id="btnProbarInternamente" href="#" target="_blank" style="background:#eff6ff; color:#0047FF; border-color:#bfdbfe; font-weight:700;">
+              🧪 Probar Pago
+            </a>
+          </div>
+
+          <!-- Monitor de Estado en Vivo -->
+          <div style="text-align: center; margin-top: 12px;">
+            <div class="live-status-pill pending" id="resultStatusPill">
+              ⏳ Esperando Pago del Cliente...
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    const CATALOGO = [
+      { id: 1, name: "Harina PAN 1kg", code: "7591001", price: 1.20, icon: "🌽" },
+      { id: 2, name: "Café Molido 250g", code: "7591002", price: 2.50, icon: "☕" },
+      { id: 3, name: "Refresco 2L", code: "7591003", price: 2.00, icon: "🥤" },
+      { id: 4, name: "Arroz Blanco 1kg", code: "7591004", price: 1.10, icon: "🍚" },
+      { id: 5, name: "Aceite Vegetal 1L", code: "7591005", price: 2.80, icon: "🍳" },
+      { id: 6, name: "Chocolate de Leche", code: "7591006", price: 1.00, icon: "🍫" }
+    ];
+
+    let carrito = {};
+    let sesionGenerada = null;
+    let pollInterval = null;
+
+    // Render Catálogo
+    const catalogGrid = document.getElementById('catalogGrid');
+    CATALOGO.forEach(prod => {
+      const div = document.createElement('div');
+      div.className = 'product-box';
+      div.innerHTML = `
+        <div class="product-icon">${prod.icon}</div>
+        <div class="product-name">${prod.name}</div>
+        <div class="product-price">$${prod.price.toFixed(2)}</div>
+        <div class="qty-controls">
+          <button class="btn-qty" onclick="cambiarCantidad(${prod.id}, -1)">-</button>
+          <span class="qty-display" id="qty-${prod.id}">0</span>
+          <button class="btn-qty" onclick="cambiarCantidad(${prod.id}, 1)">+</button>
+        </div>
+      `;
+      catalogGrid.appendChild(div);
+    });
+
+    function cambiarCantidad(id, delta) {
+      const prod = CATALOGO.find(p => p.id === id);
+      const actual = carrito[id] ? carrito[id].qty : 0;
+      const nuevo = Math.max(0, actual + delta);
+
+      if (nuevo === 0) {
+        delete carrito[id];
+      } else {
+        carrito[id] = { ...prod, qty: nuevo };
+      }
+
+      document.getElementById(`qty-${id}`).textContent = nuevo;
+      actualizarResumen();
+    }
+
+    function actualizarResumen() {
+      const container = document.getElementById('selectedItemsContainer');
+      const totalDisplay = document.getElementById('orderTotalDisplay');
+      const btnCreate = document.getElementById('btnCreateLink');
+
+      const items = Object.values(carrito);
+      if (items.length === 0) {
+        container.innerHTML = '<p style="color:#94a3b8; font-size:12px; text-align:center; margin-top:20px;">Añade productos del catálogo izquierdo</p>';
+        totalDisplay.textContent = '$0.00 USD';
+        btnCreate.disabled = true;
+        return;
+      }
+
+      container.innerHTML = '';
+      let total = 0;
+      items.forEach(it => {
+        const subtotal = it.price * it.qty;
+        total += subtotal;
+        const row = document.createElement('div');
+        row.className = 'selected-row';
+        row.innerHTML = `
+          <span><strong>${it.qty}x</strong> ${it.name}</span>
+          <span>$${subtotal.toFixed(2)}</span>
+        `;
+        container.appendChild(row);
+      });
+
+      totalDisplay.textContent = `$${total.toFixed(2)} USD`;
+      btnCreate.disabled = false;
+    }
+
+    // Crear Link de Pago
+    async function generarLinkPago() {
+      const btnCreate = document.getElementById('btnCreateLink');
+      btnCreate.disabled = true;
+      btnCreate.textContent = 'Generando en SPIDI...';
+
+      const items = Object.values(carrito);
+      const total = items.reduce((s, i) => s + (i.price * i.qty), 0);
+      const clientName = document.getElementById('clientName').value.trim() || 'Cliente';
+      const clientPhone = document.getElementById('clientPhone').value.trim() || '';
+      const sessionType = document.getElementById('sessionType').value;
+
+      try {
+        const res = await fetch('/api/create-order-link', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: total,
+            description: `Pedido de ${clientName} (${items.length} productos)`,
+            items: items,
+            client_name: clientName,
+            client_phone: clientPhone,
+            session_type: sessionType
+          })
+        });
+
+        const json = await res.json();
+        if (!json.success || !json.data) throw new Error(json.error || 'Error al crear link');
+
+        sesionGenerada = json.data;
+        mostrarResultado(sesionGenerada);
+        cargarHistorial();
+      } catch (e) {
+        alert('Error: ' + e.message);
+      } finally {
+        btnCreate.disabled = false;
+        btnCreate.textContent = '🚀 Crear Link de Pago';
+      }
+    }
+
+    function mostrarResultado(data) {
+      const linkParaCliente = data.checkoutUrl || `${window.location.origin}/checkout.html?order_id=${data.orderId}`;
+      document.getElementById('resultOrderId').textContent = data.orderId;
+      document.getElementById('resultUrlText').textContent = linkParaCliente;
+      document.getElementById('resultCard').style.display = 'block';
+
+      // Configurar enlace de WhatsApp
+      const rawPhone = data.clientPhone.replace(/\D/g, '');
+      const formattedPhone = rawPhone.startsWith('0') ? '58' + rawPhone.substring(1) : rawPhone;
+      const bcvRate = data.bcvRate || 37.50;
+      const amountVes = data.amountVes ? Number(data.amountVes).toFixed(2) : (data.amount * bcvRate).toFixed(2);
+      
+      const mensajeWA = `Hola ${data.clientName}! 👋 Gracias por tu pedido en Mi Tienda.\n\n` +
+        `📦 *Pedido:* #${data.orderId}\n` +
+        `🛍️ *Detalle:* ${data.description}\n` +
+        `💰 *Total a Pagar:* $${Number(data.amount).toFixed(2)} USD (Bs. ${amountVes})\n` +
+        `🏛️ *Tasa Oficial BCV:* Bs. ${Number(bcvRate).toFixed(2)} / USD\n\n` +
+        `👉 *Revisa tu pedido y paga aquí:*\n${linkParaCliente}\n\n` +
+        `_(Acepta Pago Móvil C2P, Débito Inmediato y Binance Pay. Al confirmar el pago recibirás tu factura digital con comprobante bancario para enviar tus datos de envío MRW por WhatsApp a la tienda)._`;
+
+      const waUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(mensajeWA)}`;
+      document.getElementById('btnSendWhatsApp').href = waUrl;
+      document.getElementById('btnProbarInternamente').href = linkParaCliente;
+
+      // Iniciar polling en vivo de este link
+      iniciarMonitoreo(data.sessionId, data.orderId);
+    }
+
+    function copiarLinkPortapapeles() {
+      if (!sesionGenerada) return;
+      const link = sesionGenerada.checkoutUrl || `${window.location.origin}/checkout.html?order_id=${sesionGenerada.orderId}`;
+      navigator.clipboard.writeText(link).then(() => {
+        alert('✓ Link de verificación copiado al portapapeles. Listo para enviar por WhatsApp.');
+      });
+    }
+
+    function iniciarMonitoreo(sessionId, orderId) {
+      if (pollInterval) clearInterval(pollInterval);
+      const pill = document.getElementById('resultStatusPill');
+      pill.className = 'live-status-pill pending';
+      pill.textContent = '⏳ Esperando Pago del Cliente...';
+
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/order-status/${sessionId}`);
+          const json = await res.json();
+          if (!json.success || !json.data) return;
+
+          const status = json.data.spidi_status || json.data.status;
+
+          if (status === 'paid') {
+            clearInterval(pollInterval);
+            pill.className = 'live-status-pill paid';
+            pill.textContent = '✅ PAGO APROBADO · Factura generada y esperando datos MRW';
+            cargarHistorial();
+          } else if (status === 'failed') {
+            clearInterval(pollInterval);
+            pill.className = 'live-status-pill failed';
+            pill.textContent = '❌ PAGO RECHAZADO POR EL BANCO';
+            cargarHistorial();
+          }
+        } catch (e) {}
+      }, 1500);
+    }
+
+    async function cargarHistorial() {
+      try {
+        const res = await fetch('/api/orders');
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        const tbody = document.getElementById('ordersTableBody');
+        if (json.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No hay órdenes creadas aún.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = '';
+        json.data.forEach(o => {
+          const tr = document.createElement('tr');
+          
+          let statusBadge = '<span class="badge-status badge-pending">Pendiente</span>';
+          if (o.status === 'paid') statusBadge = '<span class="badge-status badge-paid">Aprobado</span>';
+          if (o.status === 'failed') statusBadge = '<span class="badge-status badge-failed">Fallido</span>';
+
+          let shippingBadge = '<span style="color:#94a3b8; font-size:12px;">Sin registrar</span>';
+          if (o.shippingData) {
+            shippingBadge = `<span class="badge-status badge-shipping">📦 ${o.shippingData.courier}: ${o.shippingData.guideNumber}</span>`;
+          }
+
+          tr.innerHTML = `
+            <td><strong>${o.orderId}</strong></td>
+            <td>${o.clientName}</td>
+            <td><strong>$${Number(o.amount).toFixed(2)}</strong></td>
+            <td>${statusBadge}</td>
+            <td>${shippingBadge}</td>
+            <td style="white-space:nowrap;">
+              <a href="${o.checkoutUrl || o.paymentUrl}" target="_blank" style="color:#0047FF; font-weight:700; text-decoration:none; font-size:12px; margin-right:8px;">Ver Pedido</a>
+              <a href="/factura.html?order_id=${o.orderId}" target="_blank" style="color:#059669; font-weight:700; text-decoration:none; font-size:12px;">🧾 Factura / MRW</a>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    cargarHistorial();
+  </script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultado del Pago · SPIDI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: #f1f5f9; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      max-width: 440px;
+      width: 100%;
+      padding: 28px 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      text-align: center;
+      animation: popIn 0.25s ease-out;
+    }
+    @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .brand-header .dot { width: 8px; height: 8px; border-radius: 50%; background: #0047FF; }
+
+    /* Estado de carga */
+    .loading-state { padding: 40px 10px; }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #0047FF;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Iconos de estado */
+    .status-icon-box {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+    }
+    .icon-success { background: #dcfce7; color: #16a34a; }
+    .icon-failed { background: #fee2e2; color: #dc2626; }
+
+    .status-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .status-title.text-success { color: #15803d; }
+    .status-title.text-failed { color: #b91c1c; }
+
+    .status-subtitle { font-size: 14px; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+
+    /* Tarjeta de Razón de Rechazo */
+    .reason-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: left;
+      margin-bottom: 20px;
+    }
+    .reason-badge {
+      display: inline-block;
+      background: #fee2e2;
+      color: #b91c1c;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .reason-headline { font-size: 16px; font-weight: 700; color: #991b1b; margin-bottom: 4px; }
+    .reason-text { font-size: 13px; color: #7f1d1d; line-height: 1.4; }
+
+    /* Resumen de Monto */
+    .amount-highlight {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+    .amount-label { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+    .amount-value { font-size: 26px; font-weight: 900; color: #0f172a; margin-top: 2px; }
+
+    /* Lista de detalles */
+    .details-list {
+      background: #fff;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      text-align: left;
+      font-size: 13px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px dotted #e2e8f0;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row span:first-child { color: #64748b; }
+    .detail-row span:last-child { font-weight: 600; color: #1e293b; text-align: right; }
+
+    /* Productos */
+    .items-container {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .items-header { font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 8px; }
+    .item-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+    .item-name { color: #1e293b; font-weight: 500; }
+    .item-subtotal { font-weight: 700; color: #0f172a; }
+
+    /* Botones de acción */
+    .btn-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-primary {
+      background: #0047FF;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 71, 255, 0.25);
+    }
+    .btn-primary:hover { background: #0036cc; }
+    .btn-secondary {
+      background: #f1f5f9;
+      color: #334155;
+      margin-top: 10px;
+    }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    .sync-note {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 16px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="brand-header">
+      <span class="dot"></span>
+      <span>SPIDI Autopago Móvil</span>
+    </div>
+
+    <!-- PANTALLA 1: CARGANDO -->
+    <div id="viewLoading" class="loading-state">
+      <div class="spinner"></div>
+      <h3 style="font-size: 17px; font-weight: 700;">Verificando resultado...</h3>
+      <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Consultando estado de la transacción bancaria</p>
+    </div>
+
+    <!-- PANTALLA 2: ÉXITO -->
+    <div id="viewSuccess" style="display: none;">
+      <div class="status-icon-box icon-success">✓</div>
+      <h2 class="status-title text-success">¡Pago Procesado!</h2>
+      <p class="status-subtitle">La transacción fue autorizada con éxito por tu banco.</p>
+
+      <div class="amount-highlight">
+        <div class="amount-label">Monto Pagado</div>
+        <div class="amount-value" id="successAmount">$0.00 USD</div>
+      </div>
+
+      <div class="details-list">
+        <div class="detail-row">
+          <span>N° Control / Ticket:</span>
+          <span id="successRef">AUTO-0000</span>
+        </div>
+        <div class="detail-row">
+          <span>Referencia Bancaria:</span>
+          <span id="successBankRef">3189</span>
+        </div>
+        <div class="detail-row">
+          <span>Método:</span>
+          <span id="successMethod">Pago Móvil C2P</span>
+        </div>
+        <div class="detail-row">
+          <span>Banco:</span>
+          <span id="successBank">Banco de Venezuela</span>
+        </div>
+        <div class="detail-row">
+          <span>Titular:</span>
+          <span id="successClient">Cliente</span>
+        </div>
+      </div>
+
+      <!-- Productos Comprados -->
+      <div class="items-container" id="successItemsContainer" style="display: none;">
+        <div class="items-header">Productos Adquiridos</div>
+        <div id="successItemsList"></div>
+      </div>
+
+      <div class="sync-note">
+        🛒 <strong>¡Listo!</strong> Tu comprobante ya apareció en la pantalla del kiosco. Ya puedes retirar tu ticket y tus productos.
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button class="btn-action btn-secondary" onclick="window.close(); location.href='/';">
+          Finalizar
+        </button>
+      </div>
+    </div>
+
+    <!-- PANTALLA 3: FALLIDO / RECHAZADO -->
+    <div id="viewFailed" style="display: none;">
+      <div class="status-icon-box icon-failed">✕</div>
+      <h2 class="status-title text-failed">Pago No Procesado</h2>
+      <p class="status-subtitle">El débito bancario no pudo ser completado.</p>
+
+      <!-- Razón del Fallo -->
+      <div class="reason-box">
+        <div class="reason-badge" id="failedCodeBadge">RECHAZO BANCARIO</div>
+        <div class="reason-headline" id="failedHeadline">Clave incorrecta o fondos insuficientes</div>
+        <div class="reason-text" id="failedExplanation">
+          El banco no autorizó la operación. Por favor revisa los datos e intenta nuevamente.
+        </div>
+      </div>
+
+      <div class="amount-highlight">
+        <div class="amount-label">Monto a Pagar</div>
+        <div class="amount-value" id="failedAmount">$0.00 USD</div>
+      </div>
+
+      <div class="details-list">
+        <div class="detail-row">
+          <span>N° Control:</span>
+          <span id="failedRef">AUTO-0000</span>
+        </div>
+        <div class="detail-row">
+          <span>Banco:</span>
+          <span id="failedBank">Banco Sofitasa</span>
+        </div>
+        <div class="detail-row">
+          <span>Cédula:</span>
+          <span id="failedCedula">-</span>
+        </div>
+        <div class="detail-row">
+          <span>Teléfono:</span>
+          <span id="failedPhone">-</span>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <button class="btn-action btn-primary" id="btnRetryNow" onclick="reintentarPagoDesdeMovil()">
+        🔄 Reintentar Pago Ahora
+      </button>
+
+      <button class="btn-action btn-secondary" onclick="location.href='/'">
+        Regresar al Kiosco
+      </button>
+
+      <div class="sync-note">
+        💡 <em>El kiosco también regresó a la pantalla de cobro para permitirte reintentar.</em>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const NOMBRES_BANCOS = {
+      "0102": "Banco de Venezuela",
+      "0105": "Banco Mercantil",
+      "0108": "Banco Provincial",
+      "0134": "Banesco",
+      "0191": "Banco Nacional de Crédito",
+      "0137": "Banco Sofitasa",
+      "0163": "Banco del Tesoro",
+      "0172": "Bancamiga",
+      "0171": "Banco Activo"
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('ref') || '';
+    const initialStatus = params.get('status') || '';
+    let currentSessionData = null;
+
+    async function cargarEstado() {
+      try {
+        const res = await fetch(`/api/session-info?ref=${encodeURIComponent(ref)}`);
+        const json = await res.json();
+
+        if (!json.success || !json.data) {
+          throw new Error(json.message || 'No se pudo obtener información de la sesión');
+        }
+
+        currentSessionData = json.data;
+        const status = json.data.status;
+
+        if (status === 'paid' || initialStatus === 'success') {
+          mostrarExito(json.data);
+        } else {
+          mostrarFallo(json.data);
+        }
+      } catch (err) {
+        console.error(err);
+        // Si no pudo consultar, mostrar fallback de acuerdo al parámetro status de la URL
+        if (initialStatus === 'success') {
+          mostrarExito({ status: 'paid', identifier: ref });
+        } else {
+          mostrarFallo({ status: 'failed', identifier: ref });
+        }
+      }
+    }
+
+    function mostrarExito(data) {
+      document.getElementById('viewLoading').style.display = 'none';
+      document.getElementById('viewFailed').style.display = 'none';
+      document.getElementById('viewSuccess').style.display = 'block';
+
+      const amount = data.amount_reference || (data.stored_session && data.stored_session.amount) || 0;
+      document.getElementById('successAmount').textContent = `$${Number(amount).toFixed(2)} USD`;
+      document.getElementById('successRef').textContent = data.identifier || ref || 'AUTO-001';
+
+      const payment = data.session_payment || {};
+      const details = payment.payment_details || {};
+      const credits = (payment.receiver_credits && payment.receiver_credits.owner) || {};
+
+      document.getElementById('successBankRef').textContent = credits.spidi_credit_id || credits.bank_reference_id || '3189';
+      document.getElementById('successMethod').textContent = payment.payment_method === 'mobile_payment' ? 'Pago Móvil C2P' : 'Débito Inmediato';
+      
+      const bancoCodigo = details.banco || '0102';
+      document.getElementById('successBank').textContent = NOMBRES_BANCOS[bancoCodigo] || `Banco (${bancoCodigo})`;
+      document.getElementById('successClient').textContent = details.nombre ? `${details.nombre} (${details.cedula || ''})` : 'Cliente';
+
+      // Lista de items
+      const items = data.items || [];
+      if (items.length > 0) {
+        const list = document.getElementById('successItemsList');
+        list.innerHTML = '';
+        items.forEach(it => {
+          const row = document.createElement('div');
+          row.className = 'item-row';
+          row.innerHTML = `
+            <span class="item-name">${it.qty}x ${it.name}</span>
+            <span class="item-subtotal">$${(it.price * it.qty).toFixed(2)}</span>
+          `;
+          list.appendChild(row);
+        });
+        document.getElementById('successItemsContainer').style.display = 'block';
+      }
+    }
+
+    function mostrarFallo(data) {
+      document.getElementById('viewLoading').style.display = 'none';
+      document.getElementById('viewSuccess').style.display = 'none';
+      document.getElementById('viewFailed').style.display = 'block';
+
+      const amount = data.amount_reference || (data.stored_session && data.stored_session.amount) || 0;
+      document.getElementById('failedAmount').textContent = `$${Number(amount).toFixed(2)} USD`;
+      document.getElementById('failedRef').textContent = data.identifier || ref || 'AUTO-001';
+
+      const payment = data.session_payment || {};
+      const details = payment.payment_details || {};
+      const reason = payment.reason || '';
+      const userMessage = payment.user_message || '';
+
+      const bancoCodigo = details.banco || '';
+      document.getElementById('failedBank').textContent = NOMBRES_BANCOS[bancoCodigo] || (bancoCodigo ? `Banco (${bancoCodigo})` : 'No especificado');
+      document.getElementById('failedCedula').textContent = details.cedula ? `${details.tipo || 'V'}-${details.cedula}` : '-';
+      document.getElementById('failedPhone').textContent = details.telefono || '-';
+
+      // Clasificación específica del error para el usuario
+      const badge = document.getElementById('failedCodeBadge');
+      const headline = document.getElementById('failedHeadline');
+      const explanation = document.getElementById('failedExplanation');
+
+      if (reason === 'insufficient_funds' || userMessage.toLowerCase().includes('fondos') || userMessage.toLowerCase().includes('saldo')) {
+        badge.textContent = 'ERROR 111111 · SALDO INSUFICIENTE';
+        headline.textContent = 'Fondos Insuficientes en tu Cuenta';
+        explanation.textContent = 'Tu cuenta bancaria no dispone del saldo necesario para cubrir el total de $' + Number(amount).toFixed(2) + ' USD. Puedes recargar saldo o intentar con otra cuenta bancaria.';
+      } else if (reason === 'invalid_otp' || userMessage.toLowerCase().includes('clave') || userMessage.toLowerCase().includes('otp')) {
+        badge.textContent = 'ERROR 222222 · CLAVE INCORRECTA';
+        headline.textContent = 'Clave de Pago (OTP) Incorrecta';
+        explanation.textContent = 'La clave dinámica u OTP ingresada es incorrecta o ha vencido. Por favor genera una nueva clave en la app o SMS de tu banco e ingrésala nuevamente.';
+      } else if (reason === 'bank_limit' || userMessage.toLowerCase().includes('límite')) {
+        badge.textContent = 'ERROR 333333 · LÍMITE EXCEDIDO';
+        headline.textContent = 'Límite Máximo Bancario Superado';
+        explanation.textContent = 'La operación supera el límite diario configurado por tu entidad financiera para pagos digitales. Intenta con otro banco o eleva tu límite.';
+      } else if (data.status === 'expired') {
+        badge.textContent = 'SESIÓN EXPIRADA';
+        headline.textContent = 'Tiempo de Pago Agotado';
+        explanation.textContent = 'La sesión de pago superó el tiempo máximo de espera. Presiona reintentar para generar una nueva orden de pago.';
+      } else {
+        badge.textContent = 'PAGO RECHAZADO';
+        headline.textContent = userMessage || 'Transacción No Aprobada';
+        explanation.textContent = 'El banco emisor rechazó la solicitud de débito. Verifica tus credenciales bancarias e intenta de nuevo.';
+      }
+    }
+
+    async function reintentarPagoDesdeMovil() {
+      const btn = document.getElementById('btnRetryNow');
+      btn.disabled = true;
+      btn.innerHTML = '🔄 Generando nuevo cobro...';
+
+      try {
+        const res = await fetch('/api/retry-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ref: ref })
+        });
+        const json = await res.json();
+
+        if (!json.success || !json.data || !json.data.payment_url) {
+          throw new Error(json.message || 'No se pudo generar nuevo cobro.');
+        }
+
+        // Redirigir de inmediato al nuevo formulario de pago de SPIDI
+        window.location.href = json.data.payment_url;
+      } catch (err) {
+        alert('Error al reintentar: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '🔄 Reintentar Pago Ahora';
+      }
+    }
+
+    cargarEstado();
+  </script>
+</body>
+</html>
