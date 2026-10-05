@@ -109,11 +109,66 @@
     .pulse { width: 8px; height: 8px; border-radius: 50%; background: #0284c7; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { transform: scale(0.9); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } 100% { transform: scale(0.9); opacity: 1; } }
 
+    .modal-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 15px;
+      font-weight: 800;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      z-index: 10;
+    }
+    .modal-close-btn:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #dc2626;
+      transform: scale(1.05);
+    }
+
+    .payment-option-card.cancel-option {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+    .payment-option-card.cancel-option:hover {
+      border-color: #ef4444;
+      background: #fee2e2;
+      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.15);
+    }
+
     .btn-back-step { background: none; border: none; color: #0047FF; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 12px; display: inline-flex; align-items: center; gap: 4px; }
     .btn-back-step:hover { text-decoration: underline; }
 
-    .btn-cancel { background: none; border: none; color: #94a3b8; font-size: 13px; cursor: pointer; margin-top: 10px; }
-    .btn-cancel:hover { color: #ef4444; }
+    .btn-cancel {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      transition: all 0.15s ease;
+    }
+    .btn-cancel:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #dc2626;
+    }
 
     /* Pantalla de Error Bancario */
     .error-card {
@@ -240,6 +295,7 @@
     
     <!-- Contenedor del Flow de Pago -->
     <div class="modal-box" id="paymentContent">
+      <button class="modal-close-btn" onclick="cerrarModal()" title="Cerrar y volver a la cuenta">✕</button>
       
       <!-- PASO 1 DEL FLOW: Selección de Método mediante Botones Clickables -->
       <div class="flow-step active" id="stepMethodSelect">
@@ -271,9 +327,19 @@
             <div class="option-arrow">→</div>
           </div>
 
+          <!-- Botón 3: Cancelar Compra -->
+          <div class="payment-option-card cancel-option" onclick="cerrarModal()">
+            <div class="option-icon" style="background:#fee2e2; color:#dc2626; font-size:22px; font-weight:bold;">✕</div>
+            <div class="option-details">
+              <h4 style="color:#dc2626;">Cancelar y Seguir Comprando</h4>
+              <p>Regresar a la cuenta para modificar o añadir productos</p>
+            </div>
+            <div class="option-arrow" style="color:#dc2626;">✕</div>
+          </div>
+
         </div>
 
-        <button class="btn-cancel" onclick="cerrarModal()">✕ Cancelar compra</button>
+        <button class="btn-cancel" onclick="cerrarModal()">✕ Cancelar y Volver al Carrito</button>
       </div>
 
       <!-- PASO 2A: Vista de Código QR -->
@@ -293,7 +359,7 @@
           </div>
         </div>
 
-        <button class="btn-cancel" onclick="cerrarModal()">✕ Cancelar</button>
+        <button class="btn-cancel" onclick="cerrarModal()">✕ Cancelar y Volver al Carrito</button>
       </div>
 
       <!-- PASO 2B: Vista en Pantalla (Pasarela Embebida) -->
@@ -318,7 +384,7 @@
         </div>
 
         <div>
-          <button class="btn-cancel" onclick="cerrarModal()">✕ Cancelar</button>
+          <button class="btn-cancel" onclick="cerrarModal()">✕ Cancelar y Volver al Carrito</button>
         </div>
       </div>
 
@@ -337,7 +403,7 @@
           </button>
         </div>
 
-        <button class="btn-cancel" onclick="cerrarModal()">✕ Cancelar y revisar productos</button>
+        <button class="btn-cancel" onclick="cerrarModal()">✕ Cancelar y Modificar Pedido</button>
       </div>
 
     </div>
