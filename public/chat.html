@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pagos por Chat MD · SPIDI</title>
+  <title>Simulador de Agente WhatsApp con IA · SPIDI</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #0b141a; color: #e9edef; min-height: 100vh; display: flex; justify-content: center; }
 
     .app-wrapper {
       width: 100%;
-      max-width: 720px;
+      max-width: 760px;
       height: 100vh;
       display: flex;
       flex-direction: column;
       background: #111b21;
       border-left: 1px solid #222e35;
       border-right: 1px solid #222e35;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 25px rgba(0,0,0,0.5);
       position: relative;
     }
 
-    /* Header del Chat */
+    /* Header del Chat estilo WhatsApp */
     header {
       background: #202c33;
-      padding: 12px 16px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -40,12 +40,23 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      background: #0047FF;
+      background: linear-gradient(135deg, #00a884, #0047FF);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 22px;
-      box-shadow: 0 2px 6px rgba(0,71,255,0.4);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    .avatar-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      background: #25d366;
+      border: 2px solid #202c33;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
     }
     .user-info h2 {
       font-size: 15px;
@@ -55,7 +66,7 @@
       align-items: center;
       gap: 6px;
     }
-    .badge-verified {
+    .badge-ia {
       background: #00a884;
       color: white;
       font-size: 10px;
@@ -68,13 +79,17 @@
       color: #8696a0;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+    }
+    .status-text.typing {
+      color: #25d366;
+      font-weight: 600;
     }
     .status-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #00a884;
+      background: #25d366;
     }
 
     .header-actions {
@@ -87,23 +102,36 @@
       color: #d1d7db;
       border: 1px solid #374248;
       border-radius: 8px;
-      padding: 7px 12px;
+      padding: 6px 10px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       transition: all 0.15s ease;
     }
     .btn-nav:hover { background: #374248; color: #fff; }
+
+    /* Barra de estado informativa (Tasa BCV y Modo) */
+    .info-bar {
+      background: #182229;
+      border-bottom: 1px solid #222e35;
+      padding: 6px 16px;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #8696a0;
+    }
+    .info-bar strong { color: #e9edef; }
 
     /* Área de Mensajes */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
-      padding: 20px 16px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -128,6 +156,7 @@
       position: relative;
       box-shadow: 0 1px 2px rgba(0,0,0,0.3);
       word-break: break-word;
+      white-space: pre-line;
     }
     .msg-row.sent .msg-bubble {
       background: #005c4b;
@@ -147,59 +176,59 @@
       margin-top: 4px;
     }
 
-    /* Tarjeta de Pago Interactiva en el Chat */
+    /* Tarjeta de Orden y Pago SPIDI en el Chat */
     .payment-card {
       background: #182229;
       border: 1px solid #2a3942;
-      border-radius: 16px;
-      padding: 16px;
-      margin-top: 6px;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 8px;
       width: 100%;
       max-width: 380px;
       text-align: left;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     .payment-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       border-bottom: 1px dashed #2a3942;
-      padding-bottom: 8px;
+      padding-bottom: 6px;
     }
     .payment-tag {
       font-size: 11px;
       font-weight: 700;
       color: #00a884;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
     .payment-id {
       font-size: 11px;
       color: #8696a0;
       font-family: monospace;
     }
-
     .payment-amount-box {
       background: #202c33;
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: 10px;
+      padding: 10px;
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
-    .payment-amount-label { font-size: 11px; color: #8696a0; }
-    .payment-amount-val { font-size: 26px; font-weight: 800; color: #fff; margin-top: 2px; }
+    .payment-amount-label { font-size: 10px; color: #8696a0; }
+    .payment-amount-val { font-size: 24px; font-weight: 800; color: #fff; }
+    .payment-amount-ves { font-size: 12px; color: #00a884; font-weight: 700; margin-top: 2px; }
 
     .payment-items-list {
       font-size: 12px;
       color: #d1d7db;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      border-top: 1px dotted #2a3942;
+      padding-top: 6px;
     }
     .payment-item-entry {
       display: flex;
       justify-content: space-between;
-      padding: 3px 0;
-      border-bottom: 1px dotted #2a3942;
+      padding: 2px 0;
     }
 
     .status-badge {
@@ -210,76 +239,120 @@
       border-radius: 20px;
       font-size: 11px;
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      width: 100%;
+      justify-content: center;
     }
     .status-badge.pending { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid #ca8a04; }
     .status-badge.paid { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid #16a34a; }
-    .status-badge.failed { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid #dc2626; }
 
     .payment-btn-primary {
       background: #0047FF;
       color: white;
       border: none;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 14px;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 13px;
       font-weight: 700;
       width: 100%;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       text-decoration: none;
-      box-shadow: 0 4px 10px rgba(0, 71, 255, 0.3);
+      box-shadow: 0 3px 8px rgba(0, 71, 255, 0.3);
       transition: background 0.15s ease;
+      margin-bottom: 6px;
     }
     .payment-btn-primary:hover { background: #0036cc; }
 
     .payment-actions-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
     }
     .payment-btn-sub {
       background: #2a3942;
       color: #d1d7db;
       border: 1px solid #374248;
-      border-radius: 8px;
-      padding: 8px 6px;
+      border-radius: 6px;
+      padding: 7px 4px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
+      transition: background 0.15s ease;
     }
-    .payment-btn-sub:hover { background: #374248; color: white; }
+    .payment-btn-sub:hover { background: #374248; }
+    .payment-btn-sub.sim-pay {
+      background: #064e3b;
+      color: #34d399;
+      border-color: #059669;
+    }
+    .payment-btn-sub.sim-pay:hover { background: #047857; }
 
-    /* Barra de Chips Rápidos de Productos */
+    /* Tarjeta de Guía Interna */
+    .internal-guide-card {
+      background: #022c22;
+      border: 1px solid #059669;
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    .internal-guide-title {
+      font-weight: 800;
+      color: #34d399;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .internal-guide-code {
+      font-size: 16px;
+      font-family: monospace;
+      font-weight: 800;
+      background: #064e3b;
+      padding: 4px 8px;
+      border-radius: 6px;
+      display: inline-block;
+      margin: 6px 0;
+      color: #a7f3d0;
+    }
+
+    /* Chips Rápidos de Pregunta / Simulación */
     .quick-chips-bar {
       background: #111b21;
+      border-top: 1px solid #222e35;
       padding: 8px 12px;
       display: flex;
       gap: 8px;
       overflow-x: auto;
-      border-top: 1px solid #222e35;
-      scrollbar-width: thin;
+      white-space: nowrap;
     }
     .quick-chip {
       background: #202c33;
-      color: #d1d7db;
+      color: #00a884;
       border: 1px solid #2a3942;
-      border-radius: 16px;
       padding: 6px 12px;
+      border-radius: 16px;
       font-size: 12px;
       font-weight: 600;
-      white-space: nowrap;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
       transition: all 0.15s ease;
     }
     .quick-chip:hover {
       background: #00a884;
       color: white;
+    }
+    .quick-chip.highlight {
+      background: #005c4b;
+      color: #fff;
       border-color: #00a884;
     }
 
@@ -290,116 +363,56 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      border-top: 1px solid #2a3942;
     }
     .chat-input {
       flex: 1;
       background: #2a3942;
-      border: none;
-      border-radius: 24px;
-      padding: 12px 16px;
       color: #e9edef;
-      font-size: 14px;
+      border: none;
       outline: none;
+      padding: 10px 14px;
+      border-radius: 20px;
+      font-size: 14px;
     }
     .chat-input::placeholder { color: #8696a0; }
-
-    .btn-icon-action {
-      background: none;
-      border: none;
-      color: #8696a0;
-      font-size: 20px;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.15s ease;
-    }
-    .btn-icon-action:hover { color: #00a884; }
-
     .btn-send {
       background: #00a884;
       color: white;
       border: none;
-      width: 42px;
-      height: 42px;
       border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      font-size: 16px;
-      box-shadow: 0 2px 6px rgba(0, 168, 132, 0.4);
+      transition: background 0.15s ease;
+      flex-shrink: 0;
     }
     .btn-send:hover { background: #008f6f; }
 
-    /* Modales */
+    /* Modal de Iframe de Pago */
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(4px);
+      background: rgba(0,0,0,0.8);
       display: none;
-      justify-content: center;
       align-items: center;
-      z-index: 100;
+      justify-content: center;
+      z-index: 1000;
       padding: 16px;
     }
     .modal-box {
-      background: #202c33;
+      background: #182229;
       border: 1px solid #2a3942;
-      border-radius: 20px;
+      border-radius: 16px;
+      padding: 18px;
       width: 100%;
-      max-width: 480px;
-      padding: 24px;
-      color: #e9edef;
-      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
-      animation: pop 0.2s ease-out;
+      max-width: 460px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      text-align: center;
     }
-    @keyframes pop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    .modal-box h3 { font-size: 18px; margin-bottom: 8px; color: #fff; }
-    .modal-box p { font-size: 13px; color: #8696a0; margin-bottom: 16px; }
-
-    .form-group { margin-bottom: 12px; text-align: left; }
-    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #8696a0; margin-bottom: 4px; }
-    .form-input {
-      width: 100%;
-      background: #111b21;
-      border: 1px solid #2a3942;
-      border-radius: 10px;
-      padding: 10px 12px;
-      color: #e9edef;
-      font-size: 14px;
-      outline: none;
-    }
-    .form-input:focus { border-color: #00a884; }
-
-    .btn-modal-submit {
-      background: #00a884;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 700;
-      width: 100%;
-      cursor: pointer;
-      margin-top: 12px;
-    }
-    .btn-modal-cancel {
-      background: none;
-      border: none;
-      color: #8696a0;
-      font-size: 13px;
-      width: 100%;
-      margin-top: 8px;
-      cursor: pointer;
-    }
-
-    /* Iframe modal de pago */
     .pay-iframe-wrap {
       width: 100%;
       height: 480px;
@@ -410,30 +423,16 @@
       background: #02373D;
     }
     .pay-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
-
-    /* Simulación Rápida Box */
-    .sim-panel {
-      background: #182229;
-      border: 1px solid #2a3942;
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 14px;
-      text-align: left;
-    }
-    .sim-panel h4 { font-size: 12px; color: #facc15; margin-bottom: 6px; }
-    .sim-buttons-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-    .btn-sim {
-      background: #202c33;
-      border: 1px solid #374248;
-      color: #d1d7db;
-      border-radius: 6px;
-      padding: 6px 4px;
-      font-size: 11px;
+    .btn-modal-close {
+      background: #2a3942;
+      color: #e9edef;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      text-align: center;
     }
-    .btn-sim:hover { background: #374248; }
   </style>
 </head>
 <body>
@@ -442,173 +441,145 @@
     <!-- Header -->
     <header>
       <div class="header-user">
-        <div class="avatar">🛍️</div>
+        <div class="avatar">
+          🤖
+          <span class="avatar-badge"></span>
+        </div>
         <div class="user-info">
-          <h2>Mi Tienda <span class="badge-verified">✓ SPIDI</span></h2>
-          <div class="status-text">
+          <h2>Mi Tienda <span class="badge-ia">Agente IA</span></h2>
+          <div class="status-text" id="agentStatusText">
             <span class="status-dot"></span>
-            En línea · Ventas y Pagos por MD
+            En línea · Ventas y Envíos por WhatsApp
           </div>
         </div>
       </div>
 
       <div class="header-actions">
-        <a href="/" class="btn-nav" title="Ir al Kiosco de Autopago">
+        <a href="/admin" class="btn-nav" title="Ir al Administrador de Enlaces">
+          📦 Admin
+        </a>
+        <a href="/autopago" class="btn-nav" title="Ir al Kiosco de Autopago">
           🛒 Kiosco
         </a>
-        <button class="btn-nav" onclick="abrirModalManual()" title="Generar cobro manual para un cliente">
-          ⚡ Cobrar
+        <button class="btn-nav" onclick="reiniciarConversacion()" title="Reiniciar chat">
+          🔄
         </button>
       </div>
     </header>
 
-    <!-- Historial de Conversación -->
+    <!-- Barra Informativa -->
+    <div class="info-bar">
+      <span>Tasa Oficial BCV: <strong id="infoBcvRate">Bs. 37.50/$</strong></span>
+      <span>Pasarela: <strong>SPIDI / Sofitasa</strong></span>
+    </div>
+
+    <!-- Mensajes del Chat -->
     <main class="chat-messages" id="chatMessages">
-      <!-- Mensaje Inicial de Bienvenida -->
+      <!-- Bienvenida inicial del Agente -->
       <div class="msg-row received">
         <div class="msg-bubble">
-          ¡Hola! 👋 Bienvenido a la atención por Mensaje Directo (MD).
-          <br><br>
-          Puedes pedir productos directamente escribiéndolos aquí (ej: <em>"Quiero 2 Harinas PAN y 1 Café"</em>) o tocando los productos rápidos abajo.
-          <br><br>
-          Te generaremos un <strong>enlace oficial de pago con SPIDI</strong> (Pago Móvil C2P, Débito Inmediato o Cripto) que se confirma de inmediato en este chat.
+          ¡Hola! 👋 Soy el asistente de ventas con IA de <strong>Mi Tienda</strong>.
+
+          Dime qué producto deseas comprar o consultar (por ejemplo: <em>"Quiero 2 kilos de arroz"</em> o <em>"Dame 1 harina y 1 café"</em>).
+
+          Te generaré de inmediato tu <strong>enlace oficial de pago con SPIDI</strong> (cotizado a tasa BCV) y coordinaremos tu despacho por aquí. 🚀
           <div class="msg-time">Ahora</div>
         </div>
       </div>
     </main>
 
-    <!-- Chips Rápidos de Productos -->
+    <!-- Chips Rápidos de Prueba para el Usuario -->
     <div class="quick-chips-bar">
-      <button class="quick-chip" onclick="pedirProductoRapido('Harina PAN 1kg', 1.20, '🌽')">🌽 Harina PAN ($1.20)</button>
-      <button class="quick-chip" onclick="pedirProductoRapido('Café Molido 250g', 2.50, '☕')">☕ Café ($2.50)</button>
-      <button class="quick-chip" onclick="pedirProductoRapido('Refresco 2L', 2.00, '🥤')">🥤 Refresco ($2.00)</button>
-      <button class="quick-chip" onclick="pedirProductoRapido('Arroz Blanco 1kg', 1.10, '🍚')">🍚 Arroz ($1.10)</button>
-      <button class="quick-chip" onclick="pedirProductoRapido('Aceite Vegetal 1L', 2.80, '🍳')">🍳 Aceite ($2.80)</button>
-      <button class="quick-chip" onclick="pedirProductoRapido('Chocolate de Leche', 1.00, '🍫')">🍫 Chocolate ($1.00)</button>
-      <button class="quick-chip" style="background:#2a3942; color:#facc15;" onclick="abrirModalManual()">⚡ Monto Personalizado</button>
+      <button class="quick-chip highlight" onclick="enviarMensajeRapido('Hola, quiero 2 kilos de arroz')">
+        🍚 Pedir 2 Arroz (7591473005492)
+      </button>
+      <button class="quick-chip" onclick="enviarMensajeRapido('Quiero 1 harina pan y 1 café molido')">
+        🌽 Harina y Café
+      </button>
+      <button class="quick-chip" onclick="enviarMensajeRapido('¿Qué productos tienen y a qué tasa BCV?')">
+        📋 Ver Catálogo
+      </button>
+      <button class="quick-chip" id="chipTestShipping" onclick="enviarDatosEnvioPrueba()" style="display:none; background:#064e3b; color:#34d399;">
+        📦 Enviar Datos de Envío (Prueba)
+      </button>
     </div>
 
-    <!-- Input Footer -->
+    <!-- Footer Input -->
     <footer>
-      <button class="btn-icon-action" onclick="abrirModalManual()" title="Crear enlace de cobro específico">
-        💳
-      </button>
-
-      <input type="text" id="chatInput" class="chat-input" placeholder="Escribe tu mensaje o pedido aquí..." onkeydown="if(event.key==='Enter') enviarMensajeUsuario()">
-
-      <button class="btn-send" onclick="enviarMensajeUsuario()">
+      <input type="text" id="chatInput" class="chat-input" placeholder="Escribe tu mensaje a la IA (ej: 'Quiero 2 kilos de arroz')..." onkeydown="if(event.key==='Enter') enviarMensajeUsuario()">
+      <button class="btn-send" onclick="enviarMensajeUsuario()" title="Enviar mensaje">
         ➤
       </button>
     </footer>
   </div>
 
-  <!-- MODAL: PASARELA DE PAGO EN PANTALLA -->
+  <!-- Modal para Pagar con Iframe Seguro de SPIDI -->
   <div class="modal-backdrop" id="modalPayIframe">
-    <div class="modal-box" style="max-width: 500px;">
+    <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3>💳 Pasarela de Pago SPIDI</h3>
+        <h3 style="font-size:16px;">💳 Pasarela de Pago SPIDI</h3>
         <button style="background:none; border:none; color:#8696a0; font-size:18px; cursor:pointer;" onclick="cerrarModalPayIframe()">✕</button>
       </div>
-      <p>Completa el débito en el simulador seguro de SPIDI:</p>
+      <p style="font-size:12px; color:#8696a0;">Completa tu débito inmediato o pago móvil:</p>
 
       <div class="pay-iframe-wrap">
         <iframe id="iframeSpidiPay" src="about:blank"></iframe>
       </div>
 
-      <!-- Panel de Pruebas Rápidas con Simulador -->
-      <div class="sim-panel">
-        <h4>🧪 Pruebas Rápidas con Simulador:</h4>
-        <div class="sim-buttons-grid">
-          <button class="btn-sim" style="color:#4ade80;" onclick="simularPago('000000')">✓ 000000 (Aprobar)</button>
-          <button class="btn-sim" style="color:#f87171;" onclick="simularPago('111111')">✕ 111111 (Sin saldo)</button>
-          <button class="btn-sim" style="color:#f87171;" onclick="simularPago('222222')">✕ 222222 (Clave mal)</button>
-        </div>
-      </div>
-
-      <button class="btn-modal-cancel" onclick="cerrarModalPayIframe()">Cerrar pasarela</button>
-    </div>
-  </div>
-
-  <!-- MODAL: CÓDIGO QR PARA ESCANEAR -->
-  <div class="modal-backdrop" id="modalQR">
-    <div class="modal-box" style="text-align: center; max-width: 360px;">
-      <h3>📱 Escanea para Pagar</h3>
-      <p>Usa la cámara de tu celular o app bancaria:</p>
-      
-      <div style="background: white; padding: 16px; border-radius: 14px; display: inline-block; margin-bottom: 12px;">
-        <img id="qrImageModal" src="" alt="QR SPIDI" style="width: 220px; height: 220px; display: block;">
-      </div>
-
-      <p style="font-size: 12px; color: #00a884;" id="qrStatusNote">⏳ Esperando confirmación bancaria...</p>
-      <button class="btn-modal-submit" onclick="cerrarModalQR()">Listo</button>
-    </div>
-  </div>
-
-  <!-- MODAL: COBRO MANUAL (HERRAMIENTA VENDEDOR) -->
-  <div class="modal-backdrop" id="modalManual">
-    <div class="modal-box">
-      <h3>⚡ Crear Enlace de Cobro por MD</h3>
-      <p>Genera un link de pago oficial para enviar a cualquier cliente por WhatsApp o chat.</p>
-
-      <div class="form-group">
-        <label>Monto en USD ($)</label>
-        <input type="number" step="0.01" id="manualAmount" class="form-input" placeholder="Ej: 10.00" value="5.00">
-      </div>
-
-      <div class="form-group">
-        <label>Concepto / Descripción</label>
-        <input type="text" id="manualDesc" class="form-input" placeholder="Ej: Servicio de asesoría / Delivery" value="Pedido por WhatsApp">
-      </div>
-
-      <div class="form-group">
-        <label>Nombre del Cliente (opcional)</label>
-        <input type="text" id="manualClient" class="form-input" placeholder="Ej: Juan Pérez" value="Cliente MD">
-      </div>
-
-      <div class="form-group">
-        <label>Tipo de Enlace</label>
-        <select id="manualType" class="form-input">
-          <option value="button">Botón Rápido (con QR y 20 min de vigencia)</option>
-          <option value="request">Solicitud por Lote (Vigencia extendida de 7 días)</option>
-        </select>
-      </div>
-
-      <button class="btn-modal-submit" onclick="crearCobroManual()">Generar y Enviar al Chat</button>
-      <button class="btn-modal-cancel" onclick="cerrarModalManual()">Cancelar</button>
+      <button class="btn-modal-close" onclick="cerrarModalPayIframe()">Cerrar pasarela</button>
     </div>
   </div>
 
   <script>
-    const CATALOGO = [
-      { name: "Harina PAN 1kg", price: 1.20, icon: "🌽", keywords: ["harina", "pan"] },
-      { name: "Café Molido 250g", price: 2.50, icon: "☕", keywords: ["cafe", "café"] },
-      { name: "Refresco 2L", price: 2.00, icon: "🥤", keywords: ["refresco", "soda", "gaseosa"] },
-      { name: "Arroz Blanco 1kg", price: 1.10, icon: "🍚", keywords: ["arroz"] },
-      { name: "Aceite Vegetal 1L", price: 2.80, icon: "🍳", keywords: ["aceite"] },
-      { name: "Chocolate de Leche", price: 1.00, icon: "🍫", keywords: ["chocolate"] }
-    ];
+    let bcvRate = 37.50;
+    let sesionActiva = null;
+    let ordenActual = null;
+    let estadoConversacion = 'browsing'; // browsing | order_created | awaiting_shipping | completed
+    let pollInterval = null;
 
-    let activePollingIntervals = {};
-    let sesionActivaActual = null;
+    // Cargar tasa BCV al iniciar
+    async function cargarTasaBCV() {
+      try {
+        const res = await fetch('/api/bcv-rate');
+        const json = await res.json();
+        if (json.rate) {
+          bcvRate = Number(json.rate);
+          document.getElementById('infoBcvRate').innerText = `Bs. ${bcvRate.toFixed(2)}/$`;
+        }
+      } catch (e) {}
+    }
+    cargarTasaBCV();
 
-    function playBeep() {
+    // Audio Beeps realistas
+    function playAudioTone(freq = 600, dur = 0.15) {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
         osc.start();
-        osc.stop(ctx.currentTime + 0.2);
+        osc.stop(ctx.currentTime + dur);
       } catch (e) {}
     }
 
     function scrollChatToEnd() {
       const container = document.getElementById('chatMessages');
       container.scrollTop = container.scrollHeight;
+    }
+
+    function setAgentTyping(isTyping) {
+      const statusEl = document.getElementById('agentStatusText');
+      if (isTyping) {
+        statusEl.className = 'status-text typing';
+        statusEl.innerHTML = '<span class="status-dot"></span> escribiendo...';
+      } else {
+        statusEl.className = 'status-text';
+        statusEl.innerHTML = '<span class="status-dot"></span> En línea · Ventas y Envíos por WhatsApp';
+      }
     }
 
     function appendMessage(text, sender = 'received') {
@@ -622,59 +593,61 @@
       `;
       document.getElementById('chatMessages').appendChild(row);
       scrollChatToEnd();
+      if (sender === 'received') {
+        playAudioTone(800, 0.12);
+      } else {
+        playAudioTone(480, 0.08);
+      }
       return row;
     }
 
-    // Agregar la tarjeta interactiva de cobro SPIDI a la conversación
-    function appendPaymentCard(session) {
+    // Agregar la tarjeta interactiva de pago oficial de SPIDI
+    function appendPaymentCard(order) {
+      ordenActual = order;
+      estadoConversacion = 'order_created';
+
       const row = document.createElement('div');
       row.className = 'msg-row received';
 
-      const itemsHtml = (session.items || []).map(i => `
+      const itemsHtml = (order.items || []).map(i => `
         <div class="payment-item-entry">
-          <span>${i.qty}x ${i.name}</span>
+          <span>${i.icon || '📦'} ${i.qty}x ${i.name}</span>
           <strong>$${(i.price * i.qty).toFixed(2)}</strong>
         </div>
       `).join('');
 
       row.innerHTML = `
         <div class="msg-bubble" style="background: transparent; padding: 0; box-shadow: none;">
-          <div class="payment-card" id="card-${session.sessionId}">
+          <div class="payment-card" id="card-${order.orderId}">
             <div class="payment-card-header">
-              <span class="payment-tag">💳 Orden de Pago SPIDI</span>
-              <span class="payment-id">${session.identifier}</span>
+              <span class="payment-tag">💳 Link Oficial SPIDI</span>
+              <span class="payment-id">${order.orderId}</span>
             </div>
 
             <div class="payment-amount-box">
-              <div class="payment-amount-label">TOTAL A PAGAR</div>
-              <div class="payment-amount-val">$${Number(session.amount).toFixed(2)} USD</div>
-              <div style="font-size: 11px; color: #8696a0; margin-top: 2px;">${session.description}</div>
+              <div class="payment-amount-label">MONTO TOTAL A PAGAR</div>
+              <div class="payment-amount-val">$${Number(order.amount).toFixed(2)} USD</div>
+              <div class="payment-amount-ves">≈ Bs. ${Number(order.amountVes).toFixed(2)} (Tasa BCV ${bcvRate.toFixed(2)})</div>
             </div>
 
-            ${itemsHtml ? `<div class="payment-items-list">${itemsHtml}</div>` : ''}
+            <div class="payment-items-list">${itemsHtml}</div>
 
             <div>
-              <span class="status-badge pending" id="badge-${session.sessionId}">
+              <span class="status-badge pending" id="badge-${order.orderId}">
                 ⏳ Esperando Pago Bancario
               </span>
             </div>
 
-            <button class="payment-btn-primary" onclick="abrirModalPayIframe('${session.sessionId}', '${session.payment_url}')">
-              💳 Pagar Ahora (Pasarela SPIDI)
+            <button class="payment-btn-primary" onclick="abrirModalPayIframe('${order.orderId}', '${order.checkoutUrl || order.paymentUrl}')">
+              💳 Pagar con SPIDI
             </button>
 
             <div class="payment-actions-grid">
-              ${session.payment_qr ? `
-                <button class="payment-btn-sub" onclick="abrirModalQR('${session.payment_qr}', '${session.sessionId}')">
-                  📱 Ver QR
-                </button>
-              ` : `
-                <button class="payment-btn-sub" onclick="window.open('${session.payment_url}', '_blank')">
-                  ↗ Abrir pestaña
-                </button>
-              `}
-              <button class="payment-btn-sub" onclick="copiarLink('${session.payment_url}')">
-                📋 Copiar Enlace
+              <button class="payment-btn-sub sim-pay" onclick="simularPagoExitoso('${order.orderId}', '${order.sessionId}')">
+                🧪 Simular Pago Aprobado
+              </button>
+              <button class="payment-btn-sub" onclick="copiarLink('${order.checkoutUrl}')">
+                📋 Copiar Link
               </button>
             </div>
           </div>
@@ -684,116 +657,69 @@
 
       document.getElementById('chatMessages').appendChild(row);
       scrollChatToEnd();
-      playBeep();
-
-      // Iniciar escucha del estado en tiempo real
-      iniciarMonitoreoSesion(session.sessionId, session.identifier, session.amount);
+      iniciarMonitoreoOrden(order.orderId, order.sessionId);
     }
 
-    // Monitoreo en segundo plano del pago
-    function iniciarMonitoreoSesion(sessionId, identifier, amount) {
-      if (activePollingIntervals[sessionId]) clearInterval(activePollingIntervals[sessionId]);
+    // Monitoreo en segundo plano de la orden
+    function iniciarMonitoreoOrden(orderId, sessionId) {
+      if (pollInterval) clearInterval(pollInterval);
 
-      activePollingIntervals[sessionId] = setInterval(async () => {
+      pollInterval = setInterval(async () => {
         try {
-          const res = await fetch(`/api/check-status/${sessionId}`);
+          const res = await fetch(`/api/order-status/${orderId}`);
           const json = await res.json();
           if (!json.success || !json.data) return;
 
           const status = json.data.status;
-          const badge = document.getElementById(`badge-${sessionId}`);
+          const badge = document.getElementById(`badge-${orderId}`);
 
-          // PAGO APROBADO (000000)
-          if (status === 'paid') {
-            clearInterval(activePollingIntervals[sessionId]);
-            delete activePollingIntervals[sessionId];
+          if (status === 'paid' || status === 'accredited') {
+            clearInterval(pollInterval);
+            pollInterval = null;
 
             if (badge) {
               badge.className = 'status-badge paid';
-              badge.innerHTML = '✓ PAGO APROBADO Y VERIFICADO';
+              badge.innerHTML = '✓ PAGO VERIFICADO Y ACREDITADO';
             }
 
             cerrarModalPayIframe();
-            cerrarModalQR();
-
-            const payment = json.data.session_payment || {};
-            const credits = (payment.receiver_credits && payment.receiver_credits.owner) || {};
-            const refBancaria = credits.spidi_credit_id || credits.bank_reference_id || '3189';
-            const metodo = payment.payment_method === 'mobile_payment' ? 'Pago Móvil C2P' : 'Débito Inmediato';
-
-            // El Bot confirma automáticamente por chat
-            appendMessage(`
-              🎉 <strong>¡Pago confirmado con éxito!</strong>
-              <br><br>
-              Hemos verificado el pago de <strong>$${Number(amount).toFixed(2)} USD</strong>.
-              <br>• <strong>Referencia Bancaria:</strong> ${refBancaria}
-              <br>• <strong>Método:</strong> ${metodo}
-              <br>• <strong>Control:</strong> ${identifier}
-              <br><br>
-              ✅ Tu pedido ha sido aprobado y entra en despacho de inmediato. ¡Gracias por tu compra!
-            `, 'received');
-            playBeep();
-            return;
+            notificarPagoAprobado(json.data);
           }
-
-          // PAGO FALLIDO (111111 / 222222)
-          if (status === 'failed' || status === 'expired') {
-            clearInterval(activePollingIntervals[sessionId]);
-            delete activePollingIntervals[sessionId];
-
-            if (badge) {
-              badge.className = 'status-badge failed';
-              badge.innerHTML = '✕ PAGO RECHAZADO';
-            }
-
-            cerrarModalPayIframe();
-
-            const payment = json.data.session_payment || {};
-            const userMsg = payment.user_message || 'El banco no aprobó la transacción.';
-
-            appendMessage(`
-              ❌ <strong>Aviso de Pago: No completado</strong>
-              <br><br>
-              El banco emisor rechazó la operación: <em>"${userMsg}"</em>.
-              <br><br>
-              💡 Puedes generar un nuevo intento de cobro tocando los botones de productos o escribiéndonos aquí.
-            `, 'received');
-            return;
-          }
-
-        } catch (e) {
-          console.error(e);
-        }
-      }, 1500);
+        } catch (e) {}
+      }, 2000);
     }
 
-    // Pedido Rápido desde los chips
-    async function pedirProductoRapido(nombre, precio, icono) {
-      appendMessage(`Hola, quiero pedir 1x ${nombre} (${icono})`, 'sent');
+    // El Agente detecta el pago y solicita los datos de envío
+    function notificarPagoAprobado(order) {
+      estadoConversacion = 'awaiting_shipping';
+      playAudioTone(950, 0.25);
 
-      try {
-        const res = await fetch('/api/chat/create-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            amount: precio,
-            description: `Pedido por Chat: 1x ${nombre}`,
-            items: [{ name: nombre, price: precio, qty: 1 }],
-            client_name: 'Cliente Chat'
-          })
-        });
+      const payment = order.session_payment || {};
+      const refBancaria = order.sessionId || '3189';
 
-        const json = await res.json();
-        if (!json.success) throw new Error(json.message || 'Error al crear orden');
+      setTimeout(() => {
+        appendMessage(`🎉 <strong>¡Tu pago ha sido verificado con éxito!</strong>
 
-        appendMessage(`¡Excelente! Aquí tienes el resumen y tu enlace oficial de pago de SPIDI:`, 'received');
-        appendPaymentCard(json.data);
-      } catch (err) {
-        appendMessage(`⚠️ Hubo un error al generar la orden: ${err.message}`, 'received');
-      }
+🏦 <strong>Pasarela:</strong> SPIDI / Bco. Sofitasa
+💵 <strong>Monto verificado:</strong> $${Number(order.amount).toFixed(2)} USD (Bs. ${Number(order.amountVes).toFixed(2)})
+📋 <strong>Control de Orden:</strong> ${order.orderId}
+
+Por favor, indícanos tus datos para coordinar el despacho de tu producto:
+1. <strong>Nombre y Apellido</strong>
+2. <strong>Cédula de Identidad</strong>
+3. <strong>Teléfono de contacto</strong>
+4. <strong>Estado y Ciudad</strong>
+5. <strong>Dirección o Agencia de encomienda donde deseas recibir</strong>
+
+<em>(Puedes escribirlos directamente aquí en un solo mensaje o usar el botón rápido abajo).</em>`, 'received');
+
+        // Mostrar chip de prueba de envío
+        const chipShipping = document.getElementById('chipTestShipping');
+        if (chipShipping) chipShipping.style.display = 'inline-flex';
+      }, 800);
     }
 
-    // Mensaje libre escrito por el usuario
+    // Enviar mensaje del usuario
     async function enviarMensajeUsuario() {
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
@@ -802,144 +728,112 @@
       appendMessage(text, 'sent');
       input.value = '';
 
-      const lower = text.toLowerCase();
-
-      // Detección de productos
-      let itemsDetectados = [];
-      let totalCalculado = 0;
-
-      CATALOGO.forEach(prod => {
-        if (prod.keywords.some(k => lower.includes(k))) {
-          // Detectar cantidad aproximada
-          let qty = 1;
-          const match = text.match(new RegExp(`(\\d+)\\s*(?:de\\s*)?${prod.keywords[0]}`, 'i'));
-          if (match && match[1]) qty = parseInt(match[1]);
-
-          itemsDetectados.push({ name: prod.name, price: prod.price, qty: qty });
-          totalCalculado += prod.price * qty;
-        }
-      });
-
-      if (itemsDetectados.length > 0) {
-        try {
-          const res = await fetch('/api/chat/create-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              amount: totalCalculado,
-              description: `Pedido por Chat (${itemsDetectados.length} productos)`,
-              items: itemsDetectados,
-              client_name: 'Cliente Chat'
-            })
-          });
-
-          const json = await res.json();
-          if (!json.success) throw new Error(json.message);
-
-          appendMessage(`¡Perfecto! Hemos armado tu orden con los productos solicitados. Puedes completar tu pago con SPIDI:`, 'received');
-          appendPaymentCard(json.data);
-          return;
-        } catch (e) {
-          appendMessage(`Disculpa, ocurrió un error creando la orden: ${e.message}`, 'received');
-          return;
-        }
-      }
-
-      // Si no detectó productos específicos, responder amablemente con opciones
-      setTimeout(() => {
-        appendMessage(`
-          ¡Entendido! Si deseas ordenar productos, puedes escribir el nombre (ej: <em>"2 harinas y 1 café"</em>) o tocar uno de los productos rápidos de arriba.
-          <br><br>
-          También puedo generarte un enlace de cobro por un monto específico tocando el botón ⚡.
-        `, 'received');
-      }, 500);
-    }
-
-    // Cobro manual (herramienta del vendedor)
-    function abrirModalManual() {
-      document.getElementById('modalManual').style.display = 'flex';
-    }
-    function cerrarModalManual() {
-      document.getElementById('modalManual').style.display = 'none';
-    }
-
-    async function crearCobroManual() {
-      const amount = parseFloat(document.getElementById('manualAmount').value) || 5;
-      const desc = document.getElementById('manualDesc').value.trim() || 'Cobro por MD';
-      const client = document.getElementById('manualClient').value.trim() || 'Cliente';
-      const type = document.getElementById('manualType').value;
-
-      cerrarModalManual();
-      appendMessage(`Generando cobro para ${client} por $${amount.toFixed(2)} USD...`, 'sent');
+      // Simular tiempo de lectura/escritura de la IA
+      setAgentTyping(true);
 
       try {
-        const res = await fetch('/api/chat/create-payment', {
+        const res = await fetch('/api/agent-chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            amount: amount,
-            description: desc,
-            client_name: client,
-            session_type: type,
-            items: [{ name: desc, price: amount, qty: 1 }]
+            message: text,
+            order_id: ordenActual ? ordenActual.orderId : null,
+            conversation_state: estadoConversacion,
+            client_name: 'Cliente WhatsApp',
+            client_phone: '04141234567'
           })
         });
 
         const json = await res.json();
-        if (!json.success) throw new Error(json.message);
+        setAgentTyping(false);
 
-        appendMessage(`Enlace de cobro generado con éxito (${type === 'request' ? 'Vigencia de 7 días para WhatsApp/MD' : 'Checkout rápido con QR'}):`, 'received');
-        appendPaymentCard(json.data);
+        if (json.reply) {
+          appendMessage(json.reply, 'received');
+        }
+
+        if (json.state === 'order_created' && json.orderData) {
+          appendPaymentCard(json.orderData);
+        }
+
+        if (json.state === 'completed') {
+          estadoConversacion = 'completed';
+          document.getElementById('chipTestShipping').style.display = 'none';
+        }
+
       } catch (err) {
-        appendMessage(`⚠️ Error al generar cobro: ${err.message}`, 'received');
+        setAgentTyping(false);
+        appendMessage(`Disculpa, ocurrió un error temporal conectando con el agente: ${err.message}`, 'received');
       }
     }
 
-    // Modal de Iframe de Pago
-    function abrirModalPayIframe(sessionId, url) {
-      sesionActivaActual = sessionId;
+    function enviarMensajeRapido(txt) {
+      document.getElementById('chatInput').value = txt;
+      enviarMensajeUsuario();
+    }
+
+    // Simular que el cliente envía datos de envío de prueba
+    function enviarDatosEnvioPrueba() {
+      document.getElementById('chatInput').value = "Juan Pérez, V-18234567, 04141234567, Carabobo, Valencia, Agencia MRW San Diego";
+      enviarMensajeUsuario();
+    }
+
+    // Simular Pago Aprobado instantáneo para pruebas
+    async function simularPagoExitoso(orderId, sessionId) {
+      appendMessage("💳 [Cliente completa el pago mediante SPIDI...]", 'sent');
+      setAgentTyping(true);
+
+      try {
+        const res = await fetch('/api/simulate-pay', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: sessionId || orderId,
+            otp: '000000',
+            metodo: 'mobile_payment'
+          })
+        });
+
+        const json = await res.json();
+        setAgentTyping(false);
+
+        // Forzar estado de orden en memoria local si es necesario
+        if (ordenActual) {
+          ordenActual.status = 'paid';
+          const badge = document.getElementById(`badge-${ordenActual.orderId}`);
+          if (badge) {
+            badge.className = 'status-badge paid';
+            badge.innerHTML = '✓ PAGO VERIFICADO Y ACREDITADO';
+          }
+          notificarPagoAprobado(ordenActual);
+        }
+      } catch (e) {
+        setAgentTyping(false);
+        if (ordenActual) {
+          ordenActual.status = 'paid';
+          notificarPagoAprobado(ordenActual);
+        }
+      }
+    }
+
+    // Modal de Iframe
+    function abrirModalPayIframe(orderId, url) {
       document.getElementById('iframeSpidiPay').src = url;
       document.getElementById('modalPayIframe').style.display = 'flex';
     }
     function cerrarModalPayIframe() {
-      document.getElementById('iframeSpidiPay').src = 'about:blank';
       document.getElementById('modalPayIframe').style.display = 'none';
-    }
-
-    // Modal de QR
-    function abrirModalQR(qrSrc, sessionId) {
-      sesionActivaActual = sessionId;
-      document.getElementById('qrImageModal').src = qrSrc;
-      document.getElementById('modalQR').style.display = 'flex';
-    }
-    function cerrarModalQR() {
-      document.getElementById('modalQR').style.display = 'none';
+      document.getElementById('iframeSpidiPay').src = 'about:blank';
     }
 
     function copiarLink(url) {
       navigator.clipboard.writeText(url).then(() => {
-        alert('✓ Enlace copiado al portapapeles. Ya puedes pegarlo en WhatsApp, Telegram o Instagram.');
-      }).catch(() => {
-        prompt('Copia este enlace de pago:', url);
+        alert("Enlace copiado al portapapeles: " + url);
       });
     }
 
-    // Simulación en 1 clic desde el modal
-    async function simularPago(otp) {
-      if (!sesionActivaActual) return;
-      try {
-        const res = await fetch('/api/chat/simulate-pay', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: sesionActivaActual,
-            otp: otp
-          })
-        });
-        const json = await res.json();
-        console.log('Simulate pay result:', json);
-      } catch (e) {
-        alert('Error en simulación: ' + e.message);
+    function reiniciarConversacion() {
+      if (confirm("¿Deseas reiniciar la simulación del chat?")) {
+        window.location.reload();
       }
     }
   </script>

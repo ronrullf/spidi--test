@@ -41,7 +41,7 @@ function handleStatic(req, res) {
   else if (requestedFile === '/factura') requestedFile = 'factura.html';
   else if (requestedFile === '/error-pago') requestedFile = 'error-pago.html';
   else if (requestedFile === '/resultado') requestedFile = 'resultado.html';
-  else if (requestedFile === '/chat') requestedFile = 'chat.html';
+  else if (requestedFile === '/chat' || requestedFile === '/whatsapp' || requestedFile === '/simulador') requestedFile = 'chat.html';
   else if (requestedFile === '/envio') requestedFile = 'factura.html';
   else if (requestedFile.startsWith('/')) requestedFile = requestedFile.substring(1);
 

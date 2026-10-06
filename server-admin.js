@@ -22,6 +22,56 @@ let storeSettings = {
 // Almacén en memoria de órdenes y datos de envío
 const orders = new Map();
 
+// Catálogo de productos para el agente inteligente de ventas
+const CATALOGO_PRODUCTOS = [
+  { id: 1, name: "Harina PAN 1kg", code: "7591001", price: 1.20, icon: "🌽", keywords: ["harina pan", "harina", "pan"] },
+  { id: 2, name: "Café Molido 250g", code: "7591002", price: 2.50, icon: "☕", keywords: ["cafe", "café", "molido"] },
+  { id: 3, name: "Refresco 2L", code: "7591003", price: 2.00, icon: "🥤", keywords: ["refresco", "soda", "gaseosa"] },
+  { id: 4, name: "Arroz Blanco 1kg", code: "7591473005492", price: 1.10, icon: "🍚", keywords: ["arroz blanco", "arroz"] },
+  { id: 5, name: "Aceite Vegetal 1L", code: "7591005", price: 2.80, icon: "🍳", keywords: ["aceite vegetal", "aceite"] },
+  { id: 6, name: "Chocolate de Leche", code: "7591006", price: 1.00, icon: "🍫", keywords: ["chocolate de leche", "chocolate"] }
+];
+
+function parseOrderFromMessage(text) {
+  const normalized = (text || '').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const foundItems = [];
+
+  for (const prod of CATALOGO_PRODUCTOS) {
+    let matched = false;
+    for (const kw of prod.keywords) {
+      if (normalized.includes(kw)) {
+        matched = true;
+        break;
+      }
+    }
+    if (matched) {
+      let qty = 1;
+      const kwPattern = prod.keywords.join('|');
+      const matchBefore = normalized.match(new RegExp(`(\\d+)\\s*(?:kilos?|paquetes?|unidades?|kg)?\\s*(?:de\\s*)?(?:${kwPattern})`));
+      const matchAfter = normalized.match(new RegExp(`(?:${kwPattern})\\s*(?:x\\s*)?(\\d+)`));
+      if (matchBefore && matchBefore[1]) {
+        qty = parseInt(matchBefore[1], 10);
+      } else if (matchAfter && matchAfter[1]) {
+        qty = parseInt(matchAfter[1], 10);
+      } else if (normalized.includes('dos ' + prod.keywords[0]) || normalized.includes('2 ' + prod.keywords[0])) {
+        qty = 2;
+      } else if (normalized.includes('tres ' + prod.keywords[0]) || normalized.includes('3 ' + prod.keywords[0])) {
+        qty = 3;
+      }
+      foundItems.push({
+        id: prod.id,
+        name: prod.name,
+        code: prod.code,
+        price: prod.price,
+        qty: qty,
+        icon: prod.icon
+      });
+    }
+  }
+
+  return foundItems;
+}
+
 function getLocalIp() {
   const ifaces = os.networkInterfaces();
   for (const name of Object.keys(ifaces)) {
@@ -283,7 +333,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // API 4: Guardar Datos de Envío MRW / Courier
+  // API 4: Guardar Datos de Envío (Guía Interna de Despacho)
   if (pathname === '/api/save-shipping' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
@@ -299,17 +349,19 @@ const server = http.createServer(async (req, res) => {
           return res.end(JSON.stringify({ success: false, message: 'Orden no encontrada para asociar envío.' }));
         }
 
-        const guideNumber = 'MRW-' + Math.floor(100000 + Math.random() * 900000);
+        const guideNumber = payload.guide_number || payload.guideNumber || ('INT-' + Math.floor(100000 + Math.random() * 900000));
         const shippingInfo = {
           guideNumber: guideNumber,
-          courier: payload.courier || 'MRW',
-          recipientName: payload.recipient_name || order.clientName,
-          recipientId: payload.recipient_id || 'V-12345678',
-          recipientPhone: payload.recipient_phone || order.clientPhone,
+          isInternalGuide: true,
+          noticeMessage: 'Cuando tengamos tu guía de envío te la haremos llegar por aquí',
+          courier: payload.courier || 'Por Asignar (Nacional)',
+          recipientName: payload.recipient_name || payload.recipientName || order.clientName,
+          recipientId: payload.recipient_id || payload.recipientId || 'V-12345678',
+          recipientPhone: payload.recipient_phone || payload.recipientPhone || order.clientPhone,
           state: payload.state || 'Distrito Capital',
           city: payload.city || 'Caracas',
-          agencyAddress: payload.agency_address || 'Agencia MRW Principal',
-          deliveryType: payload.delivery_type || 'Retiro en Agencia',
+          agencyAddress: payload.agency_address || payload.agencyAddress || payload.address || 'Oficina / Dirección de entrega',
+          deliveryType: payload.delivery_type || payload.deliveryType || 'Retiro / Envío Nacional',
           notes: payload.notes || '',
           registeredAt: new Date().toISOString()
         };
@@ -318,6 +370,168 @@ const server = http.createServer(async (req, res) => {
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, data: shippingInfo }));
+      } catch (err) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: err.message }));
+      }
+    });
+    return;
+  }
+
+  // API 4B: Agente Inteligente de WhatsApp (Ventas y Despacho)
+  if (pathname === '/api/agent-chat' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      try {
+        const payload = JSON.parse(body || '{}');
+        const userMsg = (payload.message || '').trim();
+        const clientName = payload.client_name || payload.clientName || 'Cliente';
+        const clientPhone = payload.client_phone || payload.clientPhone || '04121234567';
+        const orderId = payload.order_id || payload.orderId || null;
+        const state = payload.conversation_state || payload.state || 'browsing';
+
+        // Flujo A: El cliente está enviando sus datos de despacho
+        const hasIdPattern = /\b[VvEeJjGg]?\d{6,9}\b/.test(userMsg);
+        const mentionsShippingKeywords = userMsg.toLowerCase().includes('mrw') || userMsg.toLowerCase().includes('zoom') || userMsg.toLowerCase().includes('agencia') || userMsg.toLowerCase().includes('calle') || userMsg.toLowerCase().includes('av') || userMsg.toLowerCase().includes('ciudad') || userMsg.toLowerCase().includes('estado');
+
+        if (state === 'awaiting_shipping' || (orderId && (hasIdPattern || mentionsShippingKeywords))) {
+          const order = orders.get(orderId);
+          const internalGuide = 'INT-' + Math.floor(100000 + Math.random() * 900000);
+
+          let recipientName = clientName;
+          let recipientId = 'V-12345678';
+          let phone = clientPhone;
+          let destination = userMsg;
+
+          const parts = userMsg.split(/[,\n]/).map(p => p.trim()).filter(Boolean);
+          if (parts.length >= 2) {
+            recipientName = parts[0] || clientName;
+            const foundId = parts.find(p => /\b[VvEeJjGg]?\d{6,9}\b/.test(p));
+            if (foundId) recipientId = foundId;
+            const foundPhone = parts.find(p => /\b04\d{9}\b/.test(p.replace(/\D/g, '')));
+            if (foundPhone) phone = foundPhone;
+          }
+
+          const shippingInfo = {
+            guideNumber: internalGuide,
+            isInternalGuide: true,
+            noticeMessage: 'Cuando tengamos tu guía de envío te la haremos llegar por aquí',
+            courier: 'Por Asignar (Nacional)',
+            recipientName,
+            recipientId,
+            recipientPhone: phone,
+            agencyAddress: destination,
+            deliveryType: 'Envío Nacional',
+            registeredAt: new Date().toISOString()
+          };
+
+          if (order) {
+            order.shippingData = shippingInfo;
+          }
+
+          const replyText = `✅ ¡Datos de envío registrados con éxito! 📦\n\n📌 *Código interno de despacho:* ${internalGuide}\n👤 *Destinatario:* ${recipientName} (${recipientId})\n📍 *Datos:* ${destination}\n\n*Cuando tengamos tu guía de envío te la haremos llegar por aquí.* ¡Muchas gracias por tu compra! 🙌`;
+
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({
+            success: true,
+            reply: replyText,
+            state: 'completed',
+            internalGuide,
+            shippingInfo
+          }));
+        }
+
+        // Flujo B: Consulta de catálogo o saludo
+        const parsedItems = parseOrderFromMessage(userMsg);
+
+        if (parsedItems.length === 0) {
+          let catalogoList = CATALOGO_PRODUCTOS.map(p => `• ${p.icon} *${p.name}* — $${p.price.toFixed(2)} (Bs. ${(p.price * bcvRate).toFixed(2)})`).join('\n');
+          
+          const replyText = `¡Hola ${clientName}! 👋 Bienvenido a *${storeSettings.storeName}*.\n\nAquí tienes nuestro catálogo disponible cotizado a Tasa BCV (Bs. ${bcvRate.toFixed(2)}/$):\n\n${catalogoList}\n\n💬 _Dime qué productos y cantidades deseas (ej: "Quiero 2 kilos de arroz y 1 café") y te generaré tu enlace de pago oficial de inmediato._`;
+
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({
+            success: true,
+            reply: replyText,
+            state: 'browsing'
+          }));
+        }
+
+        // Flujo C: Se detectaron productos -> Generar Orden con Link de Pago SPIDI
+        let totalUsd = 0;
+        let itemsBreakdown = [];
+        parsedItems.forEach(i => {
+          const sub = i.price * i.qty;
+          totalUsd += sub;
+          itemsBreakdown.push(`• ${i.icon} *${i.qty}x ${i.name}* ($${i.price.toFixed(2)} c/u) = $${sub.toFixed(2)}`);
+        });
+
+        const totalVes = Number((totalUsd * bcvRate).toFixed(2));
+        const newOrderId = 'ORD-' + Math.floor(1000 + Math.random() * 9000);
+        const successUrl = `${baseUrl}/factura.html?order_id=${newOrderId}`;
+        const failureUrl = `${baseUrl}/error-pago.html?order_id=${newOrderId}`;
+        const checkoutUrl = `${baseUrl}/checkout.html?order_id=${newOrderId}`;
+        const description = `Pedido ${newOrderId} (${parsedItems.map(i => `${i.qty}x ${i.name}`).join(', ')})`;
+
+        let spidiRes;
+        let sessionId = 'sim_' + Date.now();
+        let paymentUrl = checkoutUrl;
+
+        try {
+          spidiRes = await fetchSpidi('/api/v1/ext/payment-sessions/buttons', 'POST', {
+            agreement_id: SPIDI_AGREEMENT_ID,
+            amount_reference: totalUsd,
+            currency_reference: 'USD',
+            identifier_label: 'Orden',
+            identifier: newOrderId,
+            description: description,
+            success_url: successUrl,
+            failure_url: failureUrl,
+            duration_minutes: 20
+          });
+
+          if (spidiRes.data && spidiRes.data.success && spidiRes.data.data) {
+            sessionId = spidiRes.data.data.session_id;
+            paymentUrl = spidiRes.data.data.payment_url;
+          }
+        } catch (e) {
+          console.warn("SPIDI order fetch:", e.message);
+        }
+
+        const orderData = {
+          orderId: newOrderId,
+          sessionId,
+          amount: totalUsd,
+          amountVes: totalVes,
+          bcvRate,
+          checkoutUrl,
+          description,
+          items: parsedItems,
+          clientName,
+          clientPhone,
+          storePhone: storeSettings.storePhone,
+          storeName: storeSettings.storeName,
+          paymentUrl,
+          status: 'pending',
+          shippingData: null,
+          createdAt: new Date().toISOString()
+        };
+
+        orders.set(newOrderId, orderData);
+        orders.set(sessionId, orderData);
+
+        const replyText = `¡Excelente elección! 🎉 He preparado tu orden de compra:\n\n${itemsBreakdown.join('\n')}\n\n💵 *Total USD:* $${totalUsd.toFixed(2)}\n🇻🇪 *Total en Bs (BCV ${bcvRate.toFixed(2)}):* Bs. ${totalVes.toFixed(2)}\n\n💳 *Paga de forma segura con SPIDI aquí:*\n👉 ${checkoutUrl}\n\n_(Acepta Débito Inmediato y Pago Móvil C2P)_. Apenas el banco confirme tu pago te notificaré por este chat para coordinar el envío. 🚀`;
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({
+          success: true,
+          reply: replyText,
+          state: 'order_created',
+          orderId: newOrderId,
+          orderData
+        }));
+
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: err.message }));
