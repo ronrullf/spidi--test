@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kiosco Autopago · SPIDI</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #f4f6f9; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
@@ -15,10 +16,241 @@
     .container { max-width: 960px; margin: 20px auto; padding: 0 16px; width: 100%; flex: 1; display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
     @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
 
-    /* Barcode input banner */
-    .scanner-banner { background: #e0e7ff; border: 2px dashed #6366f1; border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
-    .scanner-banner input { flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; font-size: 15px; outline: none; }
-    .scanner-banner input:focus { border-color: #0047FF; box-shadow: 0 0 0 2px rgba(0,71,255,0.2); }
+    /* Barcode and Camera Scanner Box */
+    .scanner-card-box {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .scanner-banner {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .scanner-input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 220px;
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 6px 12px;
+      transition: border-color 0.15s ease;
+    }
+    .scanner-input-group:focus-within {
+      border-color: #0047FF;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(0,71,255,0.12);
+    }
+    .scanner-icon { font-size: 18px; }
+    .scanner-input-group input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0f172a;
+    }
+    .btn-add-code {
+      background: #0047FF;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-add-code:hover { background: #0036cc; }
+
+    .btn-camera-trigger {
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(16,185,129,0.25);
+      transition: all 0.15s ease;
+    }
+    .btn-camera-trigger:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .quick-scanner-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+      font-size: 12px;
+    }
+    .quick-title {
+      font-weight: 700;
+      color: #64748b;
+      margin-right: 2px;
+    }
+    .chip-test-barcode {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #1e293b;
+      padding: 5px 11px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .chip-test-barcode:hover {
+      background: #e0e7ff;
+      border-color: #0047FF;
+      color: #0047FF;
+    }
+    .chip-test-barcode.highlight {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      color: #0047FF;
+      font-weight: 800;
+    }
+    .chip-test-barcode.highlight:hover {
+      background: #dbeafe;
+      border-color: #0047FF;
+    }
+
+    /* Modal de Cámara */
+    .camera-modal-card {
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+    .camera-viewport-container {
+      position: relative;
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #0f172a;
+      min-height: 250px;
+      margin-bottom: 12px;
+    }
+    #cameraReaderView {
+      width: 100% !important;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    #cameraReaderView video {
+      border-radius: 12px;
+    }
+    .scanner-guide-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .scanner-aim-frame {
+      width: 240px;
+      height: 150px;
+      border: 2px solid #22c55e;
+      border-radius: 12px;
+      box-shadow: 0 0 0 1000px rgba(0,0,0,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .scanner-laser {
+      width: 100%;
+      height: 2px;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      position: absolute;
+      top: 0;
+      animation: scanLaser 2s linear infinite;
+    }
+    @keyframes scanLaser {
+      0% { top: 0; }
+      50% { top: 100%; }
+      100% { top: 0; }
+    }
+    .scanner-status-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .camera-test-row {
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      margin-top: 6px;
+    }
+    .btn-chip-modal-test {
+      background: #0047FF;
+      color: white;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s ease;
+    }
+    .btn-chip-modal-test:hover { background: #0036cc; }
+
+    /* Scan Toast */
+    .scan-toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: #0f172a;
+      color: white;
+      padding: 12px 22px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      z-index: 9999;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+    }
+    .scan-toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+    .scan-toast.error {
+      background: #b91c1c;
+    }
 
     /* Product Grid */
     .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -257,10 +489,35 @@
 
   <div class="container">
     <main>
-      <!-- Input para lector de barras físico o manual -->
-      <div class="scanner-banner">
-        <span>⚡ <strong>Escanear:</strong></span>
-        <input type="text" id="barcodeInput" placeholder="Pasa el lector de código de barras aquí..." autofocus>
+      <!-- Input para lector de barras físico, cámara o manual -->
+      <div class="scanner-card-box">
+        <div class="scanner-banner">
+          <div class="scanner-input-group">
+            <span class="scanner-icon">⚡</span>
+            <input type="text" id="barcodeInput" placeholder="Escanear o escribir código (ej: 7591473005492)..." autofocus>
+            <button type="button" class="btn-add-code" onclick="procesarCodigoManual()">➕ Añadir</button>
+          </div>
+          <button type="button" class="btn-camera-trigger" onclick="abrirCamaraScanner()">
+            📷 Escanear con Cámara
+          </button>
+        </div>
+
+        <!-- Barra de prueba rápida con 1-click para probar códigos -->
+        <div class="quick-scanner-bar">
+          <span class="quick-title">Probar escáner:</span>
+          <button type="button" class="chip-test-barcode highlight" onclick="simularEscaneo('7591473005492')" title="Código de barras solicitado">
+            🍚 Arroz (7591473005492)
+          </button>
+          <button type="button" class="chip-test-barcode" onclick="simularEscaneo('7591001')">
+            🌽 Harina PAN
+          </button>
+          <button type="button" class="chip-test-barcode" onclick="simularEscaneo('7591002')">
+            ☕ Café
+          </button>
+          <button type="button" class="chip-test-barcode" onclick="simularEscaneo('7591003')">
+            🥤 Refresco
+          </button>
+        </div>
       </div>
 
       <!-- Catálogo de productos táctil -->
@@ -463,12 +720,54 @@
     </div>
   </div>
 
+  <!-- Modal de Escáner con Cámara Celular / Web -->
+  <div class="modal-overlay" id="modalCameraScanner">
+    <div class="modal-box camera-modal-card">
+      <button class="modal-close-btn" onclick="cerrarCamaraScanner()" title="Cerrar escáner">✕</button>
+      
+      <h3 style="font-size: 18px; color: #0f172a; margin-bottom: 4px;">📷 Lector de Código de Barras</h3>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
+        Apunta la cámara del teléfono al código de barras del producto o QR
+      </p>
+
+      <div class="camera-viewport-container">
+        <div id="cameraReaderView"></div>
+        <div class="scanner-guide-overlay">
+          <div class="scanner-aim-frame">
+            <div class="scanner-laser"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scanner-status-text" id="cameraStatusText">
+        Iniciando cámara...
+      </div>
+
+      <!-- Test rápido dentro del modal si la cámara no enfoca o no hay paquete físico a mano -->
+      <div class="camera-test-row">
+        <span style="font-size: 11px; color: #64748b;">¿Sin paquete físico a la mano? Prueba con este botón:</span>
+        <button type="button" class="btn-chip-modal-test" onclick="simularEscaneo('7591473005492')">
+          🍚 Escanear Arroz (7591473005492)
+        </button>
+      </div>
+
+      <div style="margin-top: 14px;">
+        <button class="btn-cancel" onclick="cerrarCamaraScanner()">
+          ✕ Cerrar Cámara
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast flotante de confirmación de escaneo -->
+  <div id="scanToast" class="scan-toast">✓ Producto añadido</div>
+
   <script>
     const PRODUCTOS = [
       { id: 1, name: "Harina PAN 1kg", code: "7591001", price: 1.20, icon: "🌽" },
       { id: 2, name: "Café Molido 250g", code: "7591002", price: 2.50, icon: "☕" },
       { id: 3, name: "Refresco 2L", code: "7591003", price: 2.00, icon: "🥤" },
-      { id: 4, name: "Arroz Blanco 1kg", code: "7591004", price: 1.10, icon: "🍚" },
+      { id: 4, name: "Arroz Blanco 1kg", code: "7591473005492", price: 1.10, icon: "🍚", aliasCodes: ["7591004"] },
       { id: 5, name: "Aceite Vegetal 1L", code: "7591005", price: 2.80, icon: "🍳" },
       { id: 6, name: "Chocolate de Leche", code: "7591006", price: 1.00, icon: "🍫" }
     ];
@@ -478,6 +777,11 @@
     let sesionActual = null;
     let carritoFinalizado = [];
     let ventanaExterna = null;
+
+    let html5QrCode = null;
+    let isCameraScanning = false;
+    let lastScanTime = 0;
+    let toastTimeout = null;
 
     function playBeep(freq = 587.33, dur = 0.25) {
       try {
@@ -513,6 +817,136 @@
       } catch (e) {}
     }
 
+    // Notificación toast rápida
+    function mostrarToast(mensaje, isError = false) {
+      const toast = document.getElementById('scanToast');
+      if (!toast) return;
+      toast.innerText = mensaje;
+      if (isError) {
+        toast.classList.add('error');
+      } else {
+        toast.classList.remove('error');
+      }
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Procesamiento centralizado de códigos de barras (Cámara, Lector USB, Input o Botones de test)
+    function onBarcodeDetected(rawCode) {
+      const code = (rawCode || '').trim();
+      if (!code) return;
+
+      const prod = PRODUCTOS.find(p => p.code === code || (p.aliasCodes && p.aliasCodes.includes(code)));
+      if (prod) {
+        agregarProducto(prod);
+        playBeep(880, 0.15);
+        if (navigator.vibrate) {
+          try { navigator.vibrate(80); } catch (e) {}
+        }
+        mostrarToast(`✓ ${prod.icon} ${prod.name} ($${prod.price.toFixed(2)}) añadido`);
+      } else {
+        playErrorBeep();
+        mostrarToast(`⚠️ Código no registrado: ${code}`, true);
+      }
+    }
+
+    // Simulación de escaneo rápido desde chips
+    function simularEscaneo(code) {
+      onBarcodeDetected(code);
+    }
+
+    // Procesar entrada manual desde el input
+    function procesarCodigoManual() {
+      const input = document.getElementById('barcodeInput');
+      const code = input.value.trim();
+      if (code) {
+        onBarcodeDetected(code);
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    // Iniciar y detener lector de cámara con html5-qrcode
+    async function abrirCamaraScanner() {
+      const modal = document.getElementById('modalCameraScanner');
+      modal.classList.add('active');
+      await iniciarLectorCamara();
+    }
+
+    async function cerrarCamaraScanner() {
+      await detenerLectorCamara();
+      const modal = document.getElementById('modalCameraScanner');
+      modal.classList.remove('active');
+    }
+
+    async function iniciarLectorCamara() {
+      const statusEl = document.getElementById('cameraStatusText');
+      if (typeof Html5Qrcode === 'undefined') {
+        if (statusEl) statusEl.innerText = "Error: Librería de cámara no disponible. Usa el lector manual o los botones de prueba.";
+        return;
+      }
+      if (html5QrCode && isCameraScanning) return;
+
+      try {
+        if (statusEl) statusEl.innerText = "Accediendo a la cámara...";
+        html5QrCode = new Html5Qrcode("cameraReaderView");
+        const config = {
+          fps: 15,
+          qrbox: { width: 240, height: 150 },
+          aspectRatio: 1.333333
+        };
+
+        await html5QrCode.start(
+          { facingMode: "environment" },
+          config,
+          (decodedText) => {
+            const now = Date.now();
+            if (now - lastScanTime < 1500) return;
+            lastScanTime = now;
+            onBarcodeDetected(decodedText);
+          },
+          () => {}
+        );
+        isCameraScanning = true;
+        if (statusEl) statusEl.innerText = "Cámara activa. Centra el código de barras o QR en el recuadro.";
+      } catch (err) {
+        console.warn("No se pudo iniciar cámara trasera, probando alternativa:", err);
+        try {
+          await html5QrCode.start(
+            { facingMode: "user" },
+            { fps: 15, qrbox: { width: 240, height: 150 } },
+            (decodedText) => {
+              const now = Date.now();
+              if (now - lastScanTime < 1500) return;
+              lastScanTime = now;
+              onBarcodeDetected(decodedText);
+            },
+            () => {}
+          );
+          isCameraScanning = true;
+          if (statusEl) statusEl.innerText = "Cámara frontal activa. Centra el código en el recuadro.";
+        } catch (err2) {
+          console.error("Fallo definitivo de cámara:", err2);
+          if (statusEl) statusEl.innerText = "No se pudo acceder a la cámara (permiso denegado o sin cámara). Usa el lector manual o el botón de prueba.";
+        }
+      }
+    }
+
+    async function detenerLectorCamara() {
+      if (html5QrCode && isCameraScanning) {
+        try {
+          await html5QrCode.stop();
+          html5QrCode.clear();
+        } catch (e) {
+          console.warn("Error al detener cámara:", e);
+        }
+      }
+      isCameraScanning = false;
+    }
+
     // Render catálogo
     const grid = document.getElementById('productsGrid');
     PRODUCTOS.forEach(p => {
@@ -528,19 +962,11 @@
       grid.appendChild(card);
     });
 
-    // Escucha del escáner de código de barras
+    // Escucha del escáner de código de barras físico o Enter
     const barcodeInput = document.getElementById('barcodeInput');
     barcodeInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        const code = barcodeInput.value.trim();
-        const prod = PRODUCTOS.find(p => p.code === code);
-        if (prod) {
-          agregarProducto(prod);
-          playBeep(880, 0.15);
-        } else if (code) {
-          alert('Código de barra no encontrado: ' + code);
-        }
-        barcodeInput.value = '';
+        procesarCodigoManual();
       }
     });
 
