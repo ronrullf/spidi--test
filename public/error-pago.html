@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Error en el Pago · SPIDI</title>
+  <title>Error en el Pago · Skylink Pay (Valink Group)</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #f8fafc; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 16px; }
@@ -169,15 +169,15 @@
         const explanation = document.getElementById('errorExplanation');
 
         if (reason === 'insufficient_funds' || userMessage.toLowerCase().includes('fondos') || userMessage.toLowerCase().includes('saldo')) {
-          badge.textContent = 'ERROR 111111 · SALDO INSUFICIENTE';
+          badge.textContent = 'SALDO INSUFICIENTE';
           headline.textContent = 'Fondos Insuficientes en Cuenta';
           explanation.textContent = 'Tu cuenta bancaria no dispone del saldo necesario para cubrir el monto de $' + Number(currentOrder.amount).toFixed(2) + ' USD. Puedes recargar saldo o intentar con otra cuenta.';
         } else if (reason === 'invalid_otp' || userMessage.toLowerCase().includes('clave') || userMessage.toLowerCase().includes('otp')) {
-          badge.textContent = 'ERROR 222222 · CLAVE INCORRECTA';
+          badge.textContent = 'CLAVE INCORRECTA';
           headline.textContent = 'Clave de Pago (OTP) Inválida';
           explanation.textContent = 'La clave dinámica u OTP ingresada no coincide con la generada por tu banco. Solicita una nueva clave temporal e ingrésala nuevamente.';
         } else if (reason === 'bank_limit' || userMessage.toLowerCase().includes('límite')) {
-          badge.textContent = 'ERROR 333333 · LÍMITE EXCEDIDO';
+          badge.textContent = 'LÍMITE EXCEDIDO';
           headline.textContent = 'Límite Máximo Bancario Superado';
           explanation.textContent = 'La operación supera el límite diario configurado por tu entidad financiera para transferencias y pagos móviles.';
         } else {

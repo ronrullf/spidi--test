@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulador de Agente WhatsApp con IA · SPIDI</title>
+  <title>Simulador de Agente WhatsApp con IA · Skylink Pay</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #0b141a; color: #e9edef; min-height: 100vh; display: flex; justify-content: center; }
@@ -21,7 +21,6 @@
       position: relative;
     }
 
-    /* Header del Chat estilo WhatsApp */
     header {
       background: #202c33;
       padding: 10px 16px;
@@ -31,11 +30,7 @@
       border-bottom: 1px solid #2a3942;
       z-index: 10;
     }
-    .header-user {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .header-user { display: flex; align-items: center; gap: 12px; }
     .avatar {
       width: 44px;
       height: 44px;
@@ -81,22 +76,10 @@
       align-items: center;
       gap: 5px;
     }
-    .status-text.typing {
-      color: #25d366;
-      font-weight: 600;
-    }
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #25d366;
-    }
+    .status-text.typing { color: #25d366; font-weight: 600; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #25d366; }
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
     .btn-nav {
       background: #2a3942;
       color: #d1d7db;
@@ -114,7 +97,6 @@
     }
     .btn-nav:hover { background: #374248; color: #fff; }
 
-    /* Barra de estado informativa (Tasa BCV y Modo) */
     .info-bar {
       background: #182229;
       border-bottom: 1px solid #222e35;
@@ -127,7 +109,6 @@
     }
     .info-bar strong { color: #e9edef; }
 
-    /* Área de Mensajes */
     .chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -140,130 +121,91 @@
       background-size: 20px 20px;
     }
 
-    .msg-row {
-      display: flex;
-      width: 100%;
-    }
+    .msg-row { display: flex; width: 100%; }
     .msg-row.sent { justify-content: flex-end; }
     .msg-row.received { justify-content: flex-start; }
 
     .msg-bubble {
-      max-width: 85%;
-      border-radius: 12px;
+      max-width: 82%;
       padding: 10px 14px;
-      font-size: 14px;
+      border-radius: 12px;
+      font-size: 13.5px;
       line-height: 1.45;
       position: relative;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
       word-break: break-word;
-      white-space: pre-line;
+      white-space: pre-wrap;
     }
-    .msg-row.sent .msg-bubble {
-      background: #005c4b;
-      color: #e9edef;
-      border-top-right-radius: 2px;
-    }
-    .msg-row.received .msg-bubble {
-      background: #202c33;
-      color: #e9edef;
-      border-top-left-radius: 2px;
-    }
+    .msg-row.sent .msg-bubble { background: #005c4b; color: #e9edef; border-bottom-right-radius: 2px; }
+    .msg-row.received .msg-bubble { background: #202c33; color: #e9edef; border-bottom-left-radius: 2px; }
 
     .msg-time {
       font-size: 10px;
-      color: #8696a0;
+      color: rgba(255,255,255,0.45);
       text-align: right;
       margin-top: 4px;
     }
 
-    /* Tarjeta de Orden y Pago SPIDI en el Chat */
     .payment-card {
       background: #182229;
-      border: 1px solid #2a3942;
+      border: 1px solid #00a884;
       border-radius: 14px;
       padding: 14px;
       margin-top: 8px;
-      width: 100%;
-      max-width: 380px;
-      text-align: left;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
     }
     .payment-card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-      border-bottom: 1px dashed #2a3942;
-      padding-bottom: 6px;
+      margin-bottom: 8px;
     }
     .payment-tag {
+      background: rgba(0, 168, 132, 0.2);
+      color: #25d366;
       font-size: 11px;
       font-weight: 700;
-      color: #00a884;
-      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 12px;
     }
-    .payment-id {
-      font-size: 11px;
-      color: #8696a0;
-      font-family: monospace;
-    }
+    .payment-id { font-family: monospace; font-size: 12px; color: #8696a0; }
+    
     .payment-amount-box {
-      background: #202c33;
+      background: #111b21;
       border-radius: 10px;
       padding: 10px;
       text-align: center;
-      margin-bottom: 10px;
+      margin: 8px 0;
     }
-    .payment-amount-label { font-size: 10px; color: #8696a0; }
-    .payment-amount-val { font-size: 24px; font-weight: 800; color: #fff; }
-    .payment-amount-ves { font-size: 12px; color: #00a884; font-weight: 700; margin-top: 2px; }
+    .payment-amount-label { font-size: 11px; color: #8696a0; text-transform: uppercase; font-weight: 700; }
+    .payment-amount-val { font-size: 20px; font-weight: 900; color: #25d366; }
+    .payment-amount-ves { font-size: 13px; color: #38bdf8; font-weight: 700; margin-top: 2px; }
 
     .payment-items-list {
+      background: #111b21;
+      border-radius: 8px;
+      padding: 8px;
+      margin: 8px 0;
       font-size: 12px;
-      color: #d1d7db;
-      margin-bottom: 10px;
-      border-top: 1px dotted #2a3942;
-      padding-top: 6px;
     }
-    .payment-item-entry {
-      display: flex;
-      justify-content: space-between;
-      padding: 2px 0;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      width: 100%;
-      justify-content: center;
-    }
-    .status-badge.pending { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid #ca8a04; }
-    .status-badge.paid { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid #16a34a; }
+    .payment-item-entry { display: flex; justify-content: space-between; padding: 2px 0; }
 
     .payment-btn-primary {
       background: #0047FF;
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 13px;
-      font-weight: 700;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 800;
       width: 100%;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      margin-top: 8px;
       text-decoration: none;
-      box-shadow: 0 3px 8px rgba(0, 71, 255, 0.3);
-      transition: background 0.15s ease;
-      margin-bottom: 6px;
+      box-shadow: 0 2px 8px rgba(0,71,255,0.4);
     }
     .payment-btn-primary:hover { background: #0036cc; }
 
@@ -271,174 +213,93 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 6px;
+      margin-top: 8px;
     }
     .payment-btn-sub {
       background: #2a3942;
-      color: #d1d7db;
       border: 1px solid #374248;
-      border-radius: 6px;
-      padding: 7px 4px;
+      color: #d1d7db;
+      border-radius: 8px;
+      padding: 8px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       text-align: center;
-      transition: background 0.15s ease;
     }
-    .payment-btn-sub:hover { background: #374248; }
-    .payment-btn-sub.sim-pay {
-      background: #064e3b;
-      color: #34d399;
-      border-color: #059669;
-    }
-    .payment-btn-sub.sim-pay:hover { background: #047857; }
+    .payment-btn-sub:hover { background: #374248; color: #fff; }
+    .payment-btn-sub.sim-pay { background: #064e3b; color: #34d399; border-color: #059669; }
 
-    /* Tarjeta de Guía Interna */
-    .internal-guide-card {
-      background: #022c22;
-      border: 1px solid #059669;
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 8px;
-      font-size: 12px;
-    }
-    .internal-guide-title {
-      font-weight: 800;
-      color: #34d399;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .internal-guide-code {
-      font-size: 16px;
-      font-family: monospace;
-      font-weight: 800;
-      background: #064e3b;
-      padding: 4px 8px;
-      border-radius: 6px;
+    .status-badge {
       display: inline-block;
-      margin: 6px 0;
-      color: #a7f3d0;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 6px;
     }
+    .status-badge.pending { background: #78350f; color: #fde68a; }
+    .status-badge.paid { background: #064e3b; color: #34d399; }
 
-    /* Chips Rápidos de Pregunta / Simulación */
     .quick-chips-bar {
-      background: #111b21;
-      border-top: 1px solid #222e35;
+      background: #182229;
       padding: 8px 12px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
-      white-space: nowrap;
+      border-top: 1px solid #222e35;
     }
     .quick-chip {
       background: #202c33;
-      color: #00a884;
       border: 1px solid #2a3942;
-      padding: 6px 12px;
+      color: #d1d7db;
       border-radius: 16px;
+      padding: 5px 12px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
+      white-space: nowrap;
       transition: all 0.15s ease;
     }
-    .quick-chip:hover {
-      background: #00a884;
-      color: white;
-    }
-    .quick-chip.highlight {
-      background: #005c4b;
-      color: #fff;
-      border-color: #00a884;
-    }
+    .quick-chip:hover { background: #2a3942; color: #fff; }
+    .quick-chip.highlight { background: #005c4b; color: #25d366; border-color: #00a884; }
 
-    /* Input Footer */
     footer {
       background: #202c33;
       padding: 10px 14px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      border-top: 1px solid #2a3942;
     }
     .chat-input {
       flex: 1;
       background: #2a3942;
-      color: #e9edef;
       border: none;
-      outline: none;
-      padding: 10px 14px;
-      border-radius: 20px;
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: #e9edef;
       font-size: 14px;
+      outline: none;
     }
-    .chat-input::placeholder { color: #8696a0; }
     .btn-send {
       background: #00a884;
       color: white;
       border: none;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      font-size: 16px;
+      width: 42px;
+      height: 42px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.15s ease;
-      flex-shrink: 0;
+      font-size: 17px;
     }
-    .btn-send:hover { background: #008f6f; }
-
-    /* Modal de Iframe de Pago */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 16px;
-    }
-    .modal-box {
-      background: #182229;
-      border: 1px solid #2a3942;
-      border-radius: 16px;
-      padding: 18px;
-      width: 100%;
-      max-width: 460px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-      text-align: center;
-    }
-    .pay-iframe-wrap {
-      width: 100%;
-      height: 480px;
-      border-radius: 12px;
-      overflow: hidden;
-      margin: 12px 0;
-      border: 1px solid #2a3942;
-      background: #02373D;
-    }
-    .pay-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
-    .btn-modal-close {
-      background: #2a3942;
-      color: #e9edef;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
+    .btn-send:hover { background: #029070; }
   </style>
 </head>
 <body>
 
   <div class="app-wrapper">
-    <!-- Header -->
     <header>
       <div class="header-user">
         <div class="avatar">
@@ -446,7 +307,7 @@
           <span class="avatar-badge"></span>
         </div>
         <div class="user-info">
-          <h2>Mi Tienda <span class="badge-ia">Agente IA</span></h2>
+          <h2>Mi Tienda <span class="badge-ia">Skylink IA</span></h2>
           <div class="status-text" id="agentStatusText">
             <span class="status-dot"></span>
             En línea · Ventas y Envíos por WhatsApp
@@ -455,40 +316,31 @@
       </div>
 
       <div class="header-actions">
-        <a href="/admin" class="btn-nav" title="Ir al Administrador de Enlaces">
-          📦 Admin
-        </a>
-        <a href="/autopago" class="btn-nav" title="Ir al Kiosco de Autopago">
-          🛒 Kiosco
-        </a>
-        <button class="btn-nav" onclick="reiniciarConversacion()" title="Reiniciar chat">
-          🔄
-        </button>
+        <a href="/admin" class="btn-nav">📦 Admin</a>
+        <a href="/autopago" class="btn-nav">🛒 Kiosco</a>
+        <button class="btn-nav" onclick="reiniciarConversacion()">🔄</button>
       </div>
     </header>
 
-    <!-- Barra Informativa -->
     <div class="info-bar">
       <span>Tasa Oficial BCV: <strong id="infoBcvRate">Bs. 37.50/$</strong></span>
-      <span>Pasarela: <strong>SPIDI / Sofitasa</strong></span>
+      <span>Pasarela: <strong>Skylink Pay (Valink Group)</strong></span>
     </div>
 
-    <!-- Mensajes del Chat -->
     <main class="chat-messages" id="chatMessages">
-      <!-- Bienvenida inicial del Agente -->
       <div class="msg-row received">
         <div class="msg-bubble">
-          ¡Hola! 👋 Soy el asistente de ventas con IA de <strong>Mi Tienda</strong>.
+¡Hola! 👋 Soy el asistente de ventas con IA de <strong>Mi Tienda</strong>.
 
-          Dime qué producto deseas comprar o consultar (por ejemplo: <em>"Quiero 2 kilos de arroz"</em> o <em>"Dame 1 harina y 1 café"</em>).
+Dime qué producto deseas comprar o consultar (por ejemplo: <em>"Quiero 2 kilos de arroz"</em> o <em>"Dame 1 harina y 1 café"</em>).
 
-          Te generaré de inmediato tu <strong>enlace oficial de pago con SPIDI</strong> (cotizado a tasa BCV) y coordinaremos tu despacho por aquí. 🚀
+Te generaré de inmediato tu <strong>enlace oficial de pago con Skylink Pay</strong> (cotizado a tasa BCV en céntimos) y coordinaremos tu despacho por aquí. 🚀
           <div class="msg-time">Ahora</div>
         </div>
       </div>
     </main>
 
-    <!-- Chips Rápidos de Prueba para el Usuario -->
+    <!-- Chips Rápidos -->
     <div class="quick-chips-bar">
       <button class="quick-chip highlight" onclick="enviarMensajeRapido('Hola, quiero 2 kilos de arroz')">
         🍚 Pedir 2 Arroz (7591473005492)
@@ -504,40 +356,19 @@
       </button>
     </div>
 
-    <!-- Footer Input -->
     <footer>
       <input type="text" id="chatInput" class="chat-input" placeholder="Escribe tu mensaje a la IA (ej: 'Quiero 2 kilos de arroz')..." onkeydown="if(event.key==='Enter') enviarMensajeUsuario()">
-      <button class="btn-send" onclick="enviarMensajeUsuario()" title="Enviar mensaje">
-        ➤
-      </button>
+      <button class="btn-send" onclick="enviarMensajeUsuario()">➤</button>
     </footer>
-  </div>
-
-  <!-- Modal para Pagar con Iframe Seguro de SPIDI -->
-  <div class="modal-backdrop" id="modalPayIframe">
-    <div class="modal-box">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 style="font-size:16px;">💳 Pasarela de Pago SPIDI</h3>
-        <button style="background:none; border:none; color:#8696a0; font-size:18px; cursor:pointer;" onclick="cerrarModalPayIframe()">✕</button>
-      </div>
-      <p style="font-size:12px; color:#8696a0;">Completa tu débito inmediato o pago móvil:</p>
-
-      <div class="pay-iframe-wrap">
-        <iframe id="iframeSpidiPay" src="about:blank"></iframe>
-      </div>
-
-      <button class="btn-modal-close" onclick="cerrarModalPayIframe()">Cerrar pasarela</button>
-    </div>
   </div>
 
   <script>
     let bcvRate = 37.50;
     let sesionActiva = null;
     let ordenActual = null;
-    let estadoConversacion = 'browsing'; // browsing | order_created | awaiting_shipping | completed
+    let estadoConversacion = 'browsing';
     let pollInterval = null;
 
-    // Cargar tasa BCV al iniciar
     async function cargarTasaBCV() {
       try {
         const res = await fetch('/api/bcv-rate');
@@ -550,7 +381,6 @@
     }
     cargarTasaBCV();
 
-    // Audio Beeps realistas
     function playAudioTone(freq = 600, dur = 0.15) {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -593,15 +423,11 @@
       `;
       document.getElementById('chatMessages').appendChild(row);
       scrollChatToEnd();
-      if (sender === 'received') {
-        playAudioTone(800, 0.12);
-      } else {
-        playAudioTone(480, 0.08);
-      }
+      if (sender === 'received') playAudioTone(800, 0.12);
+      else playAudioTone(480, 0.08);
       return row;
     }
 
-    // Agregar la tarjeta interactiva de pago oficial de SPIDI
     function appendPaymentCard(order) {
       ordenActual = order;
       estadoConversacion = 'order_created';
@@ -620,14 +446,14 @@
         <div class="msg-bubble" style="background: transparent; padding: 0; box-shadow: none;">
           <div class="payment-card" id="card-${order.orderId}">
             <div class="payment-card-header">
-              <span class="payment-tag">💳 Link Oficial SPIDI</span>
+              <span class="payment-tag">💳 Skylink Pay</span>
               <span class="payment-id">${order.orderId}</span>
             </div>
 
             <div class="payment-amount-box">
               <div class="payment-amount-label">MONTO TOTAL A PAGAR</div>
               <div class="payment-amount-val">$${Number(order.amount).toFixed(2)} USD</div>
-              <div class="payment-amount-ves">≈ Bs. ${Number(order.amountVes).toFixed(2)} (Tasa BCV ${bcvRate.toFixed(2)})</div>
+              <div class="payment-amount-ves">≈ Bs. ${Number(order.amountVes).toFixed(2)} (${order.amountCentimos || Math.round(order.amountVes*100)} céntimos)</div>
             </div>
 
             <div class="payment-items-list">${itemsHtml}</div>
@@ -638,16 +464,13 @@
               </span>
             </div>
 
-            <button class="payment-btn-primary" onclick="abrirModalPayIframe('${order.orderId}', '${order.checkoutUrl || order.paymentUrl}')">
-              💳 Pagar con SPIDI
-            </button>
+            <a class="payment-btn-primary" href="${order.skylinkUrl || order.paymentUrl}" target="_blank">
+              💳 Ir a Pasarela Oficial Skylink Pay →
+            </a>
 
-            <div class="payment-actions-grid">
-              <button class="payment-btn-sub sim-pay" onclick="simularPagoExitoso('${order.orderId}', '${order.sessionId}')">
-                🧪 Simular Pago Aprobado
-              </button>
-              <button class="payment-btn-sub" onclick="copiarLink('${order.checkoutUrl}')">
-                📋 Copiar Link
+            <div style="margin-top: 8px;">
+              <button class="payment-btn-sub" style="width:100%;" onclick="copiarLink('${order.skylinkUrl || order.paymentUrl}')">
+                📋 Copiar Enlace Oficial
               </button>
             </div>
           </div>
@@ -657,13 +480,11 @@
 
       document.getElementById('chatMessages').appendChild(row);
       scrollChatToEnd();
-      iniciarMonitoreoOrden(order.orderId, order.sessionId);
+      iniciarMonitoreoOrden(order.orderId);
     }
 
-    // Monitoreo en segundo plano de la orden
-    function iniciarMonitoreoOrden(orderId, sessionId) {
+    function iniciarMonitoreoOrden(orderId) {
       if (pollInterval) clearInterval(pollInterval);
-
       pollInterval = setInterval(async () => {
         try {
           const res = await fetch(`/api/order-status/${orderId}`);
@@ -673,7 +494,7 @@
           const status = json.data.status;
           const badge = document.getElementById(`badge-${orderId}`);
 
-          if (status === 'paid' || status === 'accredited') {
+          if (status === 'paid' || status === 'AUTHORIZED') {
             clearInterval(pollInterval);
             pollInterval = null;
 
@@ -681,45 +502,38 @@
               badge.className = 'status-badge paid';
               badge.innerHTML = '✓ PAGO VERIFICADO Y ACREDITADO';
             }
-
-            cerrarModalPayIframe();
             notificarPagoAprobado(json.data);
           }
         } catch (e) {}
       }, 2000);
     }
 
-    // El Agente detecta el pago y solicita los datos de envío
     function notificarPagoAprobado(order) {
       estadoConversacion = 'awaiting_shipping';
       playAudioTone(950, 0.25);
 
-      const payment = order.session_payment || {};
-      const refBancaria = order.sessionId || '3189';
-
       setTimeout(() => {
         appendMessage(`🎉 <strong>¡Tu pago ha sido verificado con éxito!</strong>
 
-🏦 <strong>Pasarela:</strong> SPIDI / Bco. Sofitasa
+🏦 <strong>Pasarela:</strong> Skylink Pay (Valink Group)
 💵 <strong>Monto verificado:</strong> $${Number(order.amount).toFixed(2)} USD (Bs. ${Number(order.amountVes).toFixed(2)})
-📋 <strong>Control de Orden:</strong> ${order.orderId}
+📋 <strong>N° Orden:</strong> ${order.orderId}
+💳 <strong>Referencia:</strong> ${order.reference || 'SK-3189201'}
 
 Por favor, indícanos tus datos para coordinar el despacho de tu producto:
 1. <strong>Nombre y Apellido</strong>
 2. <strong>Cédula de Identidad</strong>
 3. <strong>Teléfono de contacto</strong>
 4. <strong>Estado y Ciudad</strong>
-5. <strong>Dirección o Agencia de encomienda donde deseas recibir</strong>
+5. <strong>Dirección o Agencia de encomienda</strong>
 
-<em>(Puedes escribirlos directamente aquí en un solo mensaje o usar el botón rápido abajo).</em>`, 'received');
+<em>(Puedes escribirlos directamente aquí en un solo mensaje o presionar el botón rápido abajo).</em>`, 'received');
 
-        // Mostrar chip de prueba de envío
         const chipShipping = document.getElementById('chipTestShipping');
         if (chipShipping) chipShipping.style.display = 'inline-flex';
       }, 800);
     }
 
-    // Enviar mensaje del usuario
     async function enviarMensajeUsuario() {
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
@@ -727,8 +541,6 @@ Por favor, indícanos tus datos para coordinar el despacho de tu producto:
 
       appendMessage(text, 'sent');
       input.value = '';
-
-      // Simular tiempo de lectura/escritura de la IA
       setAgentTyping(true);
 
       try {
@@ -746,6 +558,7 @@ Por favor, indícanos tus datos para coordinar el despacho de tu producto:
 
         const json = await res.json();
         setAgentTyping(false);
+        if (!res.ok || !json.success) throw new Error(json.message || json.error || 'No se pudo crear el cobro.');
 
         if (json.reply) {
           appendMessage(json.reply, 'received');
@@ -771,63 +584,14 @@ Por favor, indícanos tus datos para coordinar el despacho de tu producto:
       enviarMensajeUsuario();
     }
 
-    // Simular que el cliente envía datos de envío de prueba
     function enviarDatosEnvioPrueba() {
       document.getElementById('chatInput').value = "Juan Pérez, V-18234567, 04141234567, Carabobo, Valencia, Agencia MRW San Diego";
       enviarMensajeUsuario();
     }
 
-    // Simular Pago Aprobado instantáneo para pruebas
-    async function simularPagoExitoso(orderId, sessionId) {
-      appendMessage("💳 [Cliente completa el pago mediante SPIDI...]", 'sent');
-      setAgentTyping(true);
-
-      try {
-        const res = await fetch('/api/simulate-pay', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionId: sessionId || orderId,
-            otp: '000000',
-            metodo: 'mobile_payment'
-          })
-        });
-
-        const json = await res.json();
-        setAgentTyping(false);
-
-        // Forzar estado de orden en memoria local si es necesario
-        if (ordenActual) {
-          ordenActual.status = 'paid';
-          const badge = document.getElementById(`badge-${ordenActual.orderId}`);
-          if (badge) {
-            badge.className = 'status-badge paid';
-            badge.innerHTML = '✓ PAGO VERIFICADO Y ACREDITADO';
-          }
-          notificarPagoAprobado(ordenActual);
-        }
-      } catch (e) {
-        setAgentTyping(false);
-        if (ordenActual) {
-          ordenActual.status = 'paid';
-          notificarPagoAprobado(ordenActual);
-        }
-      }
-    }
-
-    // Modal de Iframe
-    function abrirModalPayIframe(orderId, url) {
-      document.getElementById('iframeSpidiPay').src = url;
-      document.getElementById('modalPayIframe').style.display = 'flex';
-    }
-    function cerrarModalPayIframe() {
-      document.getElementById('modalPayIframe').style.display = 'none';
-      document.getElementById('iframeSpidiPay').src = 'about:blank';
-    }
-
     function copiarLink(url) {
       navigator.clipboard.writeText(url).then(() => {
-        alert("Enlace copiado al portapapeles: " + url);
+        alert("Enlace oficial de Skylink Pay copiado al portapapeles: " + url);
       });
     }
 

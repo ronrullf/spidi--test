@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node server.js",
     "start:kiosk": "node server.js",
-    "start:admin": "node server-admin.js"
+    "start:admin": "node server-admin.js",
+    "test": "node --test --test-isolation=none",
+    "diagnose:skylink": "node scripts/diagnose-skylink.js"
   },
   "keywords": [
     "spidi",
@@ -17,5 +19,8 @@
     "bcv"
   ],
   "author": "ronrullf",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  }
 }

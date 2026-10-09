@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La Merienda · Min tienda</title><link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/" aria-label="La Merienda, inicio"><span class="brand-icon">m.</span> La Merienda</a><span class="badge">Tienda de prueba</span></header>
+  <main>
+    <section class="intro"><p class="eyebrow">PEQUEÑOS GUSTOS, PRECIOS CLAROS</p><h1>Tu próxima<br><em>buena pausa.</em></h1><p>Elige una merienda y genera tu enlace de pago.<br>Todos los precios están en bolívares.</p></section>
+    <div class="layout">
+      <section aria-labelledby="catalog-title"><div class="section-heading"><h2 id="catalog-title">Elige tu favorito</h2><span>Bs. 22 – Bs. 60</span></div><div id="products" class="products"><p>Cargando productos…</p></div></section>
+      <aside class="checkout" aria-labelledby="checkout-title"><div class="checkout-top"><span class="eyebrow">TU PEDIDO</span><span>01 producto</span></div><h2 id="checkout-title">Una pausa para ti</h2><p class="muted">Un producto por pedido de prueba.</p><div class="order-line"><span id="selected-name">Selecciona un producto</span><strong id="selected-price">—</strong></div><div class="total"><span>Total a pagar</span><strong id="total">—</strong></div><p class="currency-note">Monto fijo en Bs. · Sin conversión de dólares</p><button id="pay" class="primary" disabled>Generar link de pago <span>↗</span></button><p class="payment-note">El pago se completa en Skylink.<br>Crear el enlace todavía no realiza el cobro.</p>
+        <section id="result" class="result" hidden aria-live="polite" tabindex="-1"><strong id="result-title"></strong><p id="result-message"></p><a id="payment-link" class="primary" hidden target="_blank" rel="noopener noreferrer">Abrir página de pago ↗</a><button id="copy" class="secondary" hidden>Copiar enlace</button><button id="new-attempt" class="secondary" hidden>Iniciar otra prueba</button><details id="details"><summary>Ver diagnóstico de la API</summary><pre id="diagnostics"></pre></details></section>
+      </aside>
+    </div>
+    <footer><span>La Merienda <b>·</b> Min tienda</span><p>Entorno de desarrollo de Skylink. Catálogo de demostración.</p></footer>
+  </main>
+</body>
+</html>

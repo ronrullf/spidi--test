@@ -78,9 +78,10 @@ if (require.main === module) {
   server.listen(PORT, '0.0.0.0', () => {
     const localIp = getLocalIp();
     console.log(`=======================================================`);
-    console.log(`🚀 Sistema Unificado SPIDI Iniciado:`);
+    console.log(`🚀 Sistema Unificado Skylink Pay (Valink Group) Iniciado:`);
     console.log(`🛒 Kiosco Autopago:        http://localhost:${PORT}/ (o /autopago)`);
     console.log(`📦 Admin Ventas WhatsApp:  http://localhost:${PORT}/admin`);
+    console.log(`🤖 Agente Chat WhatsApp:   http://localhost:${PORT}/chat`);
     console.log(`🌐 Acceso en tu Red Local: http://${localIp}:${PORT}/`);
     console.log(`=======================================================`);
   });

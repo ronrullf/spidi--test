@@ -3,400 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Ventas & Envíos · SPIDI</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: #f1f5f9; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; }
-
-    header {
-      background: #0f172a;
-      color: white;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #0047FF;
-    }
-    .header-brand { display: flex; align-items: center; gap: 10px; }
-    .header-brand h1 { font-size: 19px; font-weight: 800; }
-    .header-badge { background: #0047FF; color: white; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-
-    .header-links a {
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: 8px;
-      background: #1e293b;
-      transition: all 0.15s ease;
-    }
-    .header-links a:hover { color: #fff; background: #334155; }
-
-    .main-container {
-      max-width: 1140px;
-      width: 100%;
-      margin: 24px auto;
-      padding: 0 16px;
-      display: grid;
-      grid-template-columns: 1fr 420px;
-      gap: 24px;
-      flex: 1;
-    }
-    @media (max-width: 900px) { .main-container { grid-template-columns: 1fr; } }
-
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 22px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-      margin-bottom: 20px;
-    }
-    .card-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: #0f172a;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #f1f5f9;
-    }
-
-    /* Grid de Catálogo */
-    .catalog-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px;
-    }
-    .product-box {
-      background: #f8fafc;
-      border: 2px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 14px;
-      text-align: center;
-      transition: all 0.15s ease;
-      cursor: pointer;
-    }
-    .product-box:hover { border-color: #0047FF; background: #eff6ff; }
-    .product-icon { font-size: 32px; margin-bottom: 6px; }
-    .product-name { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
-    .product-price { font-size: 15px; font-weight: 800; color: #0047FF; }
-    
-    .qty-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .btn-qty {
-      background: white;
-      border: 1px solid #cbd5e1;
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-qty:hover { background: #e2e8f0; }
-    .qty-display { font-size: 14px; font-weight: 700; min-width: 20px; text-align: center; }
-
-    /* Formulario de Orden */
-    .form-group { margin-bottom: 14px; }
-    .form-label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; }
-    .form-input {
-      width: 100%;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 14px;
-      outline: none;
-      transition: border-color 0.15s ease;
-    }
-    .form-input:focus { border-color: #0047FF; box-shadow: 0 0 0 2px rgba(0,71,255,0.15); }
-
-    /* Items seleccionados */
-    .selected-items {
-      min-height: 80px;
-      max-height: 200px;
-      overflow-y: auto;
-      margin-bottom: 14px;
-      background: #f8fafc;
-      border-radius: 10px;
-      padding: 10px 14px;
-      border: 1px dashed #cbd5e1;
-    }
-    .selected-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      padding: 5px 0;
-      border-bottom: 1px dotted #e2e8f0;
-    }
-    .selected-row:last-child { border-bottom: none; }
-
-    .total-banner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 18px;
-      font-weight: 900;
-      padding: 14px;
-      background: #eff6ff;
-      border-radius: 12px;
-      margin-bottom: 16px;
-      border: 1px solid #bfdbfe;
-      color: #1e3a8a;
-    }
-
-    .btn-create-link {
-      background: #0047FF;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 800;
-      width: 100%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.15s ease;
-      box-shadow: 0 4px 12px rgba(0,71,255,0.25);
-    }
-    .btn-create-link:hover { background: #0036cc; }
-    .btn-create-link:disabled { background: #94a3b8; cursor: not-allowed; }
-
-    /* Tarjeta de Enlace Generado */
-    .result-card {
-      background: #ecfdf5;
-      border: 2px solid #6ee7b7;
-      border-radius: 16px;
-      padding: 20px;
-      margin-top: 20px;
-      animation: pop 0.2s ease-out;
-    }
-    @keyframes pop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    .result-url-box {
-      background: white;
-      border: 1px solid #a7f3d0;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-family: monospace;
-      font-size: 12px;
-      color: #065f46;
-      word-break: break-all;
-      margin: 10px 0 14px;
-    }
-
-    .btn-whatsapp {
-      background: #25d366;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 14px;
-      font-weight: 700;
-      width: 100%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-decoration: none;
-      margin-bottom: 8px;
-      box-shadow: 0 4px 10px rgba(37,211,102,0.3);
-    }
-    .btn-whatsapp:hover { background: #1eb857; }
-
-    .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .btn-secondary {
-      background: white;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      color: #1e293b;
-    }
-    .btn-secondary:hover { background: #f8fafc; }
-
-    /* Estado de Monitoreo en Vivo */
-    .live-status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-top: 12px;
-    }
-    .live-status-pill.pending { background: #fef3c7; color: #b45309; }
-    .live-status-pill.paid { background: #dcfce7; color: #15803d; }
-    .live-status-pill.failed { background: #fee2e2; color: #b91c1c; }
-
-    /* Tabla de Historial */
-    .orders-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-    .orders-table th { text-align: left; background: #f8fafc; padding: 10px; border-bottom: 2px solid #e2e8f0; font-size: 11px; color: #64748b; }
-    .orders-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
-
-    .badge-status { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
-    .badge-paid { background: #dcfce7; color: #16a34a; }
-    .badge-pending { background: #fef3c7; color: #d97706; }
-    .badge-failed { background: #fee2e2; color: #dc2626; }
-    .badge-shipping { background: #e0e7ff; color: #4338ca; }
-  </style>
+  <title>Admin Ventas & Envíos · Skylink Pay (Valink Group)</title>
+  <link rel="stylesheet" href="/pay-ui.css">
 </head>
 <body>
 
   <header>
-    <div class="header-brand">
-      <h1>📦 SPIDI Admin · Ventas & Envíos</h1>
-      <span class="header-badge">Panel WhatsApp</span>
-    </div>
-    <div class="header-links">
-      <a href="/chat" style="background:#25d366; color:white; border-color:#25d366;" target="_blank">🤖 Probar Chat IA WhatsApp</a>
-      <a href="/autopago" target="_blank">🛒 Abrir Kiosco de Autopago</a>
-    </div>
+    <a class="brand" href="/autopago"><span class="brand-mark">s</span> Skypay</a>
+    <nav class="header-links" aria-label="Secciones">
+      <a href="/autopago" >Kiosco</a><a href="/admin" class="active" aria-current="page">Links de pago</a><a href="/chat">Chat</a>
+    </nav>
   </header>
+  <section class="page-heading"><div><p class="eyebrow">ADMINISTRACIÓN</p><h1>Crea un link. Comparte y cobra.</h1><p>Selecciona productos o define un monto para tu cliente.</p></div><span class="service-badge">Pagos con Skylink</span></section>
 
   <div class="main-container">
-    
-    <!-- COLUMNA 1: CATÁLOGO Y HISTORIAL -->
     <main>
-      <!-- Selección de Productos -->
+      <!-- Selección rápida del Catálogo -->
       <div class="card">
         <div class="card-title">
-          <span>🛍️ 1. Seleccionar Gama de Productos</span>
-          <span style="font-size: 12px; color: #64748b; font-weight: normal;">Toca los botones para armar el pedido</span>
+          <span>Productos</span>
+          <span style="font-size:12px; font-weight:600; color:#64748b;">Toca para sumar</span>
         </div>
-
         <div class="catalog-grid" id="catalogGrid"></div>
       </div>
 
-      <!-- Historial de Órdenes Creadas -->
+      <!-- Historial de Órdenes y Despacho -->
       <div class="card">
         <div class="card-title">
-          <span>📋 Órdenes Recientes & Estado de Envío</span>
-          <button style="background:none; border:none; color:#0047FF; font-size:12px; font-weight:700; cursor:pointer;" onclick="cargarHistorial()">🔄 Actualizar</button>
+          <span>Órdenes recientes</span>
+          <button style="background:none; border:none; color:#245c49; cursor:pointer; font-size:12px; font-weight:700;" onclick="cargarHistorial()">Actualizar</button>
         </div>
-
-        <table class="orders-table">
-          <thead>
-            <tr>
-              <th>ORDEN</th>
-              <th>CLIENTE</th>
-              <th>TOTAL</th>
-              <th>PAGO SPIDI</th>
-              <th>ENVÍO MRW</th>
-              <th>ACCIÓN</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTableBody">
-            <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Cargando órdenes...</td></tr>
-          </tbody>
-        </table>
+        <div style="overflow-x: auto;">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>ORDEN</th>
+                <th>CLIENTE</th>
+                <th>TOTAL</th>
+                <th>ESTADO</th>
+                <th>DESPACHO INT</th>
+                <th>ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+              <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Cargando órdenes...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
 
-    <!-- COLUMNA 2: DETALLES DE ORDEN Y GENERADOR DE LINK -->
+    <!-- Panel Lateral: Generador de Enlace -->
     <aside>
       <div class="card">
-        <div class="card-title">
-          <span>📝 2. Resumen & Generar Link</span>
-        </div>
+        <div class="card-title">Nuevo enlace <button class="rate-pill" onclick="editarTasaBCV()" id="headerBcvRate">Editar tasa</button></div>
 
-        <!-- Formulario del Cliente -->
-        <div class="form-group">
-          <label class="form-label">Nombre del Cliente</label>
-          <input type="text" id="clientName" class="form-input" placeholder="Ej: María Rodríguez" value="María Rodríguez">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Teléfono de WhatsApp</label>
-          <input type="text" id="clientPhone" class="form-input" placeholder="Ej: 04121234567" value="04121234567">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="clientName" class="form-label">Nombre (opcional)</label>
+            <input type="text" id="clientName" class="form-input" placeholder="Ej: Carlos Silva" >
+          </div>
+          <div class="form-group">
+            <label for="clientPhone" class="form-label">WhatsApp (opcional)</label>
+            <input type="tel" id="clientPhone" class="form-input" placeholder="04141234567" >
+          </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Tipo de Enlace</label>
-          <select id="sessionType" class="form-input">
-            <option value="button" selected>Link de Pago Oficial (Redirige a MRW en éxito / Errores en fallo)</option>
-            <option value="request">Solicitud Extendida WhatsApp (Vigencia 7 días)</option>
-          </select>
+          <label class="form-label">Productos Seleccionados</label>
+          <div class="selected-items" id="selectedItems">
+            <div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:24px;">Selecciona productos del catálogo a la izquierda</div>
+          </div>
         </div>
 
-        <!-- Detalle de Productos Seleccionados -->
-        <label class="form-label">Productos Seleccionados</label>
-        <div class="selected-items" id="selectedItemsContainer">
-          <p style="color:#94a3b8; font-size:12px; text-align:center; margin-top:20px;">
-            Añade productos del catálogo izquierdo
-          </p>
+        <div class="form-group">
+          <label for="customAmount" class="form-label">Monto personalizado en USD</label>
+          <input type="number" min="0.01" step="0.01" id="customAmount" class="form-input" placeholder="0.00" oninput="actualizarTotalPersonalizado()">
         </div>
 
-        <!-- Banner de Total -->
         <div class="total-banner">
-          <span>Total a Cobrar:</span>
-          <span id="orderTotalDisplay">$0.00 USD</span>
+          <div>
+            <div style="font-size:12px; font-weight:700; text-transform:uppercase;">Total a Cobrar</div>
+            <div style="font-size:11px; opacity:0.8;">Tasa configurada: Bs. <span id="labelBcvRate">37.50</span></div>
+          </div>
+          <div class="total-values">
+            <div class="total-usd" id="displayTotalUSD">$0.00</div>
+            <div class="total-ves" id="displayTotalVES">Bs. 0.00</div>
+          </div>
         </div>
 
-        <!-- Botón Principal -->
-        <button class="btn-create-link" id="btnCreateLink" disabled onclick="generarLinkPago()">
-          🚀 Crear Link de Pago
+        <p id="paymentError" class="inline-message" role="alert" hidden></p>
+        <button class="btn-create-link" id="btnCreateLink" onclick="crearEnlaceSkylink()">
+          Generar link de pago
         </button>
 
-        <!-- TARJETA CON LINK GENERADO -->
-        <div class="result-card" id="resultCard" style="display: none;">
-          <h4 style="color: #065f46; font-size: 15px; font-weight: 800; display:flex; justify-content:space-between;">
-            <span>✓ Link Generado Exitosamente</span>
-            <span id="resultOrderId" style="font-family:monospace; font-size:13px;">ORD-0000</span>
-          </h4>
-          <p style="font-size: 12px; color: #047857; margin-top: 4px;">
-            Mándale este enlace a tu cliente por WhatsApp:
-          </p>
+        <p class="helper">Generar el enlace crea una orden pendiente. El cliente paga al abrirlo.</p>
+        <!-- Tarjeta de Enlace Generado -->
+        <div class="result-card" id="resultCard" style="display:none;">
+          <div style="font-weight:800; font-size:14px; color:#065f46;">Enlace listo para compartir</div>
+          <div class="result-url-box" id="resultUrl">https://...</div><p class="helper" id="copyStatus" role="status"></p>
 
-          <div class="result-url-box" id="resultUrlText">https://sim.mispidi.com/pay/...</div>
-
-          <!-- Botón de Envío por WhatsApp con mensaje pre-redactado -->
-          <a class="btn-whatsapp" id="btnSendWhatsApp" href="#" target="_blank">
-            📲 Enviar por WhatsApp al Cliente
+          <a href="#" class="btn-whatsapp" id="btnShareWA" target="_blank" rel="noopener noreferrer">
+            Compartir por WhatsApp
           </a>
 
           <div class="action-row">
-            <button class="btn-secondary" onclick="copiarLinkPortapapeles()">
-              📋 Copiar Enlace
-            </button>
-            <a class="btn-secondary" id="btnProbarInternamente" href="#" target="_blank" style="background:#eff6ff; color:#0047FF; border-color:#bfdbfe; font-weight:700;">
-              🧪 Probar Pago
-            </a>
-          </div>
-
-          <!-- Monitor de Estado en Vivo -->
-          <div style="text-align: center; margin-top: 12px;">
-            <div class="live-status-pill pending" id="resultStatusPill">
-              ⏳ Esperando Pago del Cliente...
-            </div>
+            <button class="btn-secondary" onclick="copiarLinkResultado()">Copiar enlace</button>
+            <a href="#" class="btn-secondary" id="btnOpenCheckout" target="_blank" rel="noopener noreferrer">↗ Abrir</a>
           </div>
         </div>
-
       </div>
     </aside>
-
   </div>
 
+  <footer class="page-footer"><span>Skypay · Administración</span><span>El pago se completa en Skylink</span></footer>
   <script>
     const CATALOGO = [
       { id: 1, name: "Harina PAN 1kg", code: "7591001", price: 1.20, icon: "🌽" },
@@ -407,178 +127,181 @@
       { id: 6, name: "Chocolate de Leche", code: "7591006", price: 1.00, icon: "🍫" }
     ];
 
-    let carrito = {};
-    let sesionGenerada = null;
-    let pollInterval = null;
+    let bcvRate = 37.50;
+    let selectedProducts = [];
+    let currentOrderResult = null;
+    let creating = false;
+    function showError(message) { const box = document.getElementById("paymentError"); box.textContent = message; box.hidden = !message; }
 
-    // Render Catálogo
-    const catalogGrid = document.getElementById('catalogGrid');
-    CATALOGO.forEach(prod => {
-      const div = document.createElement('div');
-      div.className = 'product-box';
-      div.innerHTML = `
-        <div class="product-icon">${prod.icon}</div>
-        <div class="product-name">${prod.name}</div>
-        <div class="product-price">$${prod.price.toFixed(2)}</div>
-        <div class="qty-controls">
-          <button class="btn-qty" onclick="cambiarCantidad(${prod.id}, -1)">-</button>
-          <span class="qty-display" id="qty-${prod.id}">0</span>
-          <button class="btn-qty" onclick="cambiarCantidad(${prod.id}, 1)">+</button>
-        </div>
-      `;
-      catalogGrid.appendChild(div);
-    });
-
-    function cambiarCantidad(id, delta) {
-      const prod = CATALOGO.find(p => p.id === id);
-      const actual = carrito[id] ? carrito[id].qty : 0;
-      const nuevo = Math.max(0, actual + delta);
-
-      if (nuevo === 0) {
-        delete carrito[id];
-      } else {
-        carrito[id] = { ...prod, qty: nuevo };
-      }
-
-      document.getElementById(`qty-${id}`).textContent = nuevo;
-      actualizarResumen();
+    async function cargarTasaBCV() {
+      try {
+        const res = await fetch('/api/bcv-rate');
+        const json = await res.json();
+        if (json.rate) {
+          bcvRate = Number(json.rate);
+          document.getElementById('headerBcvRate').textContent = `Tasa: ${bcvRate.toFixed(2)} · Editar`;
+          document.getElementById('labelBcvRate').textContent = bcvRate.toFixed(2);
+          renderCatalogo();
+          actualizarTotales();
+        }
+      } catch (e) { showError("No se pudo cargar la tasa configurada. Recarga antes de generar un enlace."); }
     }
 
-    function actualizarResumen() {
-      const container = document.getElementById('selectedItemsContainer');
-      const totalDisplay = document.getElementById('orderTotalDisplay');
-      const btnCreate = document.getElementById('btnCreateLink');
+    async function editarTasaBCV() {
+      const nueva = prompt("Tasa de conversión configurada (Bs por USD):", bcvRate);
+      if (nueva && Number.isFinite(Number(nueva)) && Number(nueva) > 0) {
+        await fetch('/api/bcv-rate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rate: Number(nueva) })
+        });
+        await cargarTasaBCV();
+      }
+    }
 
-      const items = Object.values(carrito);
-      if (items.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8; font-size:12px; text-align:center; margin-top:20px;">Añade productos del catálogo izquierdo</p>';
-        totalDisplay.textContent = '$0.00 USD';
-        btnCreate.disabled = true;
+    function renderCatalogo() {
+      const grid = document.getElementById('catalogGrid');
+      grid.innerHTML = '';
+      CATALOGO.forEach(p => {
+        const div = document.createElement('button');
+        div.type = 'button';
+        div.className = 'product-box';
+        const priceBs = (p.price * bcvRate).toFixed(2);
+        div.innerHTML = `
+          <div class="product-icon">${p.icon}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-price">$${p.price.toFixed(2)}</div>
+          <div class="product-price-bs">Bs. ${priceBs}</div>
+        `;
+        div.onclick = () => agregarItem(p);
+        grid.appendChild(div);
+      });
+    }
+
+    function agregarItem(p) {
+      if (creating) return;
+      const found = selectedProducts.find(i => i.id === p.id);
+      if (found) found.qty++;
+      else selectedProducts.push({ ...p, qty: 1 });
+      document.getElementById('customAmount').value = '';
+      actualizarTotales();
+    }
+
+    function actualizarTotales() {
+      if (!creating) { currentOrderResult = null; document.getElementById("resultCard").style.display = "none"; }
+      const container = document.getElementById('selectedItems');
+      if (selectedProducts.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:12px; margin-top:24px;">Selecciona productos del catálogo a la izquierda</div>';
+      } else {
+        container.innerHTML = '';
+        selectedProducts.forEach(it => {
+          const row = document.createElement('div');
+          row.className = 'selected-row';
+          row.innerHTML = `
+            <span>${it.icon} ${it.qty}x ${it.name}</span>
+            <span><strong>$${(it.price * it.qty).toFixed(2)}</strong><button class="text-button" aria-label="Quitar ${it.name}" onclick="quitarItem(${it.id})">−</button></span>
+          `;
+          container.appendChild(row);
+        });
+      }
+
+      let totalUsd = selectedProducts.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const custom = parseFloat(document.getElementById('customAmount').value);
+      if (!isNaN(custom) && custom > 0) {
+        totalUsd = custom;
+      }
+
+      const totalBs = (totalUsd * bcvRate).toFixed(2);
+      document.getElementById('displayTotalUSD').textContent = `$${totalUsd.toFixed(2)}`;
+      document.getElementById('displayTotalVES').textContent = `Bs. ${totalBs}`;
+    }
+
+    function quitarItem(id) { if (creating) return; const item = selectedProducts.find(p => p.id === id); if (item) item.qty--; selectedProducts = selectedProducts.filter(p => p.qty > 0); actualizarTotales(); }
+
+    function actualizarTotalPersonalizado() {
+      if (document.getElementById("customAmount").value) selectedProducts = [];
+      actualizarTotales();
+    }
+
+    async function crearEnlaceSkylink() {
+      if (creating) return;
+      showError("");
+      currentOrderResult = null;
+      document.getElementById("resultCard").style.display = "none";
+      const clientName = document.getElementById('clientName').value.trim() || 'Cliente';
+      const clientPhone = document.getElementById('clientPhone').value.trim() || '';
+
+      let totalUsd = selectedProducts.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const custom = parseFloat(document.getElementById('customAmount').value);
+      if (!isNaN(custom) && custom > 0) totalUsd = custom;
+
+      if (totalUsd <= 0) {
+        showError("Selecciona productos o ingresa un monto mayor a cero.");
         return;
       }
 
-      container.innerHTML = '';
-      let total = 0;
-      items.forEach(it => {
-        const subtotal = it.price * it.qty;
-        total += subtotal;
-        const row = document.createElement('div');
-        row.className = 'selected-row';
-        row.innerHTML = `
-          <span><strong>${it.qty}x</strong> ${it.name}</span>
-          <span>$${subtotal.toFixed(2)}</span>
-        `;
-        container.appendChild(row);
-      });
-
-      totalDisplay.textContent = `$${total.toFixed(2)} USD`;
-      btnCreate.disabled = false;
-    }
-
-    // Crear Link de Pago
-    async function generarLinkPago() {
-      const btnCreate = document.getElementById('btnCreateLink');
-      btnCreate.disabled = true;
-      btnCreate.textContent = 'Generando en SPIDI...';
-
-      const items = Object.values(carrito);
-      const total = items.reduce((s, i) => s + (i.price * i.qty), 0);
-      const clientName = document.getElementById('clientName').value.trim() || 'Cliente';
-      const clientPhone = document.getElementById('clientPhone').value.trim() || '';
-      const sessionType = document.getElementById('sessionType').value;
+      const btn = document.getElementById('btnCreateLink');
+      creating = true;
+      document.querySelectorAll(".product-box, .form-input, .rate-pill").forEach(el => el.disabled = true);
+      btn.disabled = true;
+      btn.innerText = "Creando transacción en Skylink Pay...";
 
       try {
         const res = await fetch('/api/create-order-link', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            amount: total,
-            description: `Pedido de ${clientName} (${items.length} productos)`,
-            items: items,
+            amount: totalUsd,
+            description: selectedProducts.length > 0 ? selectedProducts.map(i => `${i.qty}x ${i.name}`).join(', ') : 'Orden de Compra',
+            items: selectedProducts,
             client_name: clientName,
-            client_phone: clientPhone,
-            session_type: sessionType
+            client_phone: clientPhone
           })
         });
 
         const json = await res.json();
-        if (!json.success || !json.data) throw new Error(json.error || 'Error al crear link');
+        if (!res.ok || !json.success || !json.data) throw new Error(json.message || "Error al crear orden");
 
-        sesionGenerada = json.data;
-        mostrarResultado(sesionGenerada);
-        cargarHistorial();
-      } catch (e) {
-        alert('Error: ' + e.message);
+        currentOrderResult = json.data;
+        mostrarResultado(currentOrderResult);
+        await cargarHistorial();
+      } catch (err) {
+        showError(err.message);
       } finally {
-        btnCreate.disabled = false;
-        btnCreate.textContent = '🚀 Crear Link de Pago';
+        creating = false;
+        document.querySelectorAll(".product-box, .form-input, .rate-pill").forEach(el => el.disabled = false);
+        btn.disabled = false;
+        btn.innerText = "Generar link de pago";
       }
     }
 
-    function mostrarResultado(data) {
-      const linkParaCliente = data.checkoutUrl || `${window.location.origin}/checkout.html?order_id=${data.orderId}`;
-      document.getElementById('resultOrderId').textContent = data.orderId;
-      document.getElementById('resultUrlText').textContent = linkParaCliente;
+    function mostrarResultado(order) {
       document.getElementById('resultCard').style.display = 'block';
+      document.getElementById('copyStatus').textContent = '';
+      const officialPayUrl = order.skylinkUrl || order.paymentUrl;
+      document.getElementById('resultUrl').textContent = officialPayUrl;
+      document.getElementById('btnOpenCheckout').href = officialPayUrl;
 
-      // Configurar enlace de WhatsApp
-      const rawPhone = data.clientPhone.replace(/\D/g, '');
-      const formattedPhone = rawPhone.startsWith('0') ? '58' + rawPhone.substring(1) : rawPhone;
-      const bcvRate = data.bcvRate || 37.50;
-      const amountVes = data.amountVes ? Number(data.amountVes).toFixed(2) : (data.amount * bcvRate).toFixed(2);
-      
-      const mensajeWA = `Hola ${data.clientName}! 👋 Gracias por tu pedido en Mi Tienda.\n\n` +
-        `📦 *Pedido:* #${data.orderId}\n` +
-        `🛍️ *Detalle:* ${data.description}\n` +
-        `💰 *Total a Pagar:* $${Number(data.amount).toFixed(2)} USD (Bs. ${amountVes})\n` +
-        `🏛️ *Tasa Oficial BCV:* Bs. ${Number(bcvRate).toFixed(2)} / USD\n\n` +
-        `👉 *Revisa tu pedido y paga aquí:*\n${linkParaCliente}\n\n` +
-        `_(Acepta Pago Móvil C2P, Débito Inmediato y Binance Pay. Al confirmar el pago recibirás tu factura digital con comprobante bancario para enviar tus datos de envío MRW por WhatsApp a la tienda)._`;
+      const itemsStr = order.items && order.items.length > 0 ? order.items.map(i => `• ${i.qty}x ${i.name} ($${(i.price*i.qty).toFixed(2)})`).join('\n') : `• ${order.description}`;
+      const msg = `¡Hola ${order.clientName}! 👋 He preparado tu orden de compra en *Mi Tienda*:\n\n` +
+        `${itemsStr}\n\n` +
+        `💵 *Total USD:* $${Number(order.amount).toFixed(2)}\n` +
+        `🇻🇪 *Total Bs (Tasa ${Number(order.bcvRate).toFixed(2)}):* Bs. ${Number(order.amountVes).toFixed(2)}\n\n` +
+        `💳 *Paga directamente en la pasarela oficial de Skylink Pay aquí:*\n👉 ${officialPayUrl}\n\n` +
+        `_(Acepta Pago Móvil C2P y Débito Inmediato)_. Al confirmar tu pago coordinaremos el despacho de inmediato. 🚀`;
 
-      const waUrl = `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(mensajeWA)}`;
-      document.getElementById('btnSendWhatsApp').href = waUrl;
-      document.getElementById('btnProbarInternamente').href = linkParaCliente;
-
-      // Iniciar polling en vivo de este link
-      iniciarMonitoreo(data.sessionId, data.orderId);
+      let phoneClean = (order.clientPhone || '').replace(/\D/g, '');
+      if (phoneClean.startsWith('0')) phoneClean = '58' + phoneClean.slice(1);
+      const waUrl = phoneClean ? `https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      document.getElementById('btnShareWA').href = waUrl;
     }
 
-    function copiarLinkPortapapeles() {
-      if (!sesionGenerada) return;
-      const link = sesionGenerada.checkoutUrl || `${window.location.origin}/checkout.html?order_id=${sesionGenerada.orderId}`;
-      navigator.clipboard.writeText(link).then(() => {
-        alert('✓ Link de verificación copiado al portapapeles. Listo para enviar por WhatsApp.');
-      });
+    async function copiarLinkResultado() {
+      if (!currentOrderResult) return;
+      try { await navigator.clipboard.writeText(currentOrderResult.skylinkUrl || currentOrderResult.paymentUrl); document.getElementById('copyStatus').textContent = 'Enlace copiado'; }
+      catch { document.getElementById('copyStatus').textContent = 'Selecciona el enlace para copiarlo manualmente.'; }
     }
-
-    function iniciarMonitoreo(sessionId, orderId) {
-      if (pollInterval) clearInterval(pollInterval);
-      const pill = document.getElementById('resultStatusPill');
-      pill.className = 'live-status-pill pending';
-      pill.textContent = '⏳ Esperando Pago del Cliente...';
-
-      pollInterval = setInterval(async () => {
-        try {
-          const res = await fetch(`/api/order-status/${sessionId}`);
-          const json = await res.json();
-          if (!json.success || !json.data) return;
-
-          const status = json.data.spidi_status || json.data.status;
-
-          if (status === 'paid') {
-            clearInterval(pollInterval);
-            pill.className = 'live-status-pill paid';
-            pill.textContent = '✅ PAGO APROBADO · Factura generada y esperando datos MRW';
-            cargarHistorial();
-          } else if (status === 'failed') {
-            clearInterval(pollInterval);
-            pill.className = 'live-status-pill failed';
-            pill.textContent = '❌ PAGO RECHAZADO POR EL BANCO';
-            cargarHistorial();
-          }
-        } catch (e) {}
-      }, 1500);
-    }
+    function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
     async function cargarHistorial() {
       try {
@@ -587,43 +310,42 @@
         if (!json.success || !json.data) return;
 
         const tbody = document.getElementById('ordersTableBody');
+        tbody.innerHTML = '';
+
         if (json.data.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No hay órdenes creadas aún.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No hay órdenes registradas aún</td></tr>';
           return;
         }
 
-        tbody.innerHTML = '';
-        json.data.forEach(o => {
+        json.data.forEach(ord => {
           const tr = document.createElement('tr');
-          
-          let statusBadge = '<span class="badge-status badge-pending">Pendiente</span>';
-          if (o.status === 'paid') statusBadge = '<span class="badge-status badge-paid">Aprobado</span>';
-          if (o.status === 'failed') statusBadge = '<span class="badge-status badge-failed">Fallido</span>';
-
-          let shippingBadge = '<span style="color:#94a3b8; font-size:12px;">Sin registrar</span>';
-          if (o.shippingData) {
-            shippingBadge = `<span class="badge-status badge-shipping">📦 ${o.shippingData.courier}: ${o.shippingData.guideNumber}</span>`;
-          }
+          const isPaid = ord.status === 'paid' || ord.status === 'AUTHORIZED';
+          const badgeClass = isPaid ? 'badge-paid' : 'badge-pending';
+          const statusText = isPaid ? 'Pagado' : 'Pendiente';
+          const dispatch = ord.shippingData ? ord.shippingData.guideNumber : '—';
 
           tr.innerHTML = `
-            <td><strong>${o.orderId}</strong></td>
-            <td>${o.clientName}</td>
-            <td><strong>$${Number(o.amount).toFixed(2)}</strong></td>
-            <td>${statusBadge}</td>
-            <td>${shippingBadge}</td>
-            <td style="white-space:nowrap;">
-              <a href="${o.checkoutUrl || o.paymentUrl}" target="_blank" style="color:#0047FF; font-weight:700; text-decoration:none; font-size:12px; margin-right:8px;">Ver Pedido</a>
-              <a href="/factura.html?order_id=${o.orderId}" target="_blank" style="color:#059669; font-weight:700; text-decoration:none; font-size:12px;">🧾 Factura / MRW</a>
+            <td><strong>#${escapeHtml(ord.orderId.slice(0, 12))}</strong></td>
+            <td>${escapeHtml(ord.clientName || 'Cliente')}</td>
+            <td>$${Number(ord.amount).toFixed(2)} <span style="font-size:11px; color:#64748b;">(Bs. ${Number(ord.amountVes || ord.amount*bcvRate).toFixed(2)})</span></td>
+            <td><span class="badge-status ${badgeClass}">${statusText}</span></td>
+            <td><strong style="color:#b45309; font-family:monospace;">${escapeHtml(dispatch)}</strong></td>
+            <td>
+              <a href="${escapeHtml(ord.skylinkUrl || ord.paymentUrl)}" target="_blank" rel="noopener noreferrer" style="color:#245c49; text-decoration:none; font-weight:700; font-size:12px; margin-right:6px;">Pagar en Skylink</a>
+              <a href="/factura.html?order_id=${ord.orderId}" target="_blank" rel="noopener noreferrer" style="color:#10b981; text-decoration:none; font-weight:700; font-size:12px;">Factura</a>
             </td>
           `;
           tbody.appendChild(tr);
         });
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) {}
     }
 
-    cargarHistorial();
+    // Inicializar
+    window.addEventListener('DOMContentLoaded', async () => {
+      await cargarTasaBCV();
+      await cargarHistorial();
+      setInterval(cargarHistorial, 4000);
+    });
   </script>
 </body>
 </html>

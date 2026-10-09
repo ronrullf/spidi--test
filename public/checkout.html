@@ -3,302 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verificación de Pedido · Mi Tienda</title>
+  <title>Redirigiendo a Skylink Pay...</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: #f1f5f9; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; }
-
-    .checkout-card {
-      background: white;
-      border-radius: 24px;
-      max-width: 520px;
-      width: 100%;
-      padding: 32px 26px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-      border: 1px solid #e2e8f0;
-      animation: pop 0.25s ease-out;
-    }
-    @keyframes pop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    .brand-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 2px solid #f1f5f9;
-      padding-bottom: 16px;
-      margin-bottom: 20px;
-    }
-    .brand-title { font-size: 18px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px; }
-    .order-badge { background: #e0e7ff; color: #4338ca; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; font-family: monospace; }
-
-    .greeting-box {
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      border-left: 4px solid #0047FF;
-      font-size: 13px;
-      color: #334155;
-      line-height: 1.4;
-    }
-    .greeting-box strong { color: #0f172a; }
-
-    .section-subtitle {
-      font-size: 12px;
-      font-weight: 800;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 10px;
-    }
-
-    /* Lista de Productos */
-    .products-list {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .product-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      border-bottom: 1px dashed #f1f5f9;
-      font-size: 14px;
-    }
-    .product-row:last-child { border-bottom: none; }
-    .product-info { display: flex; align-items: center; gap: 10px; }
-    .product-qty { background: #e2e8f0; color: #0f172a; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 6px; }
-    .product-name { font-weight: 600; color: #1e293b; }
-    .product-subtotal { font-weight: 800; color: #0f172a; }
-
-    /* Cuadro de Total Doble Moneda (USD y Bs BCV) */
-    .total-highlight-card {
-      background: #0f172a;
-      color: white;
-      border-radius: 18px;
-      padding: 20px;
-      text-align: center;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 14px rgba(15,23,42,0.25);
-    }
-    .total-highlight-card .label { font-size: 12px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-    
-    .dual-currency-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 12px 0;
-      padding: 10px 0;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .curr-col { display: flex; flex-direction: column; align-items: center; }
-    .curr-col.border-r { border-right: 1px solid rgba(255,255,255,0.1); }
-    .curr-name { font-size: 11px; color: #94a3b8; font-weight: 700; }
-    .curr-val { font-size: 24px; font-weight: 900; color: #fff; margin-top: 2px; }
-    .curr-val.ves { color: #38bdf8; }
-
-    .bcv-rate-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,255,255,0.1);
-      color: #cbd5e1;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    /* Métodos admitidos */
-    .methods-pill-box {
-      display: flex;
-      justify-content: space-around;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 10px 8px;
-      margin-bottom: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      color: #475569;
-    }
-    .method-item { display: flex; align-items: center; gap: 4px; }
-
-    /* Botón de Pago */
-    .btn-pay-now {
-      background: #0047FF;
-      color: white;
-      border: none;
-      border-radius: 14px;
-      padding: 16px;
-      font-size: 15px;
-      font-weight: 800;
-      width: 100%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-decoration: none;
-      box-shadow: 0 4px 14px rgba(0, 71, 255, 0.35);
-      transition: all 0.15s ease;
-    }
-    .btn-pay-now:hover { background: #0036cc; transform: translateY(-1px); }
-
-    .security-note {
-      text-align: center;
-      font-size: 11px;
-      color: #64748b;
-      margin-top: 14px;
-      line-height: 1.4;
-    }
+    body { background-color: #0f172a; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+    .loader-box { background: #1e293b; border-radius: 20px; padding: 36px 28px; max-width: 440px; width: 100%; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .spinner { width: 50px; height: 50px; border: 4px solid #334155; border-top-color: #0047FF; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    h2 { font-size: 19px; margin-bottom: 8px; color: #fff; }
+    p { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+    a.btn-direct { display: inline-block; background: #0047FF; color: white; padding: 12px 24px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 14px; }
   </style>
 </head>
 <body>
-
-  <div class="checkout-card">
-    
-    <!-- Encabezado -->
-    <div class="brand-header">
-      <div class="brand-title">
-        <span>🛍️ Mi Tienda</span>
-      </div>
-      <div class="order-badge" id="orderBadge">#ORD-0000</div>
-    </div>
-
-    <!-- Saludo al Cliente -->
-    <div class="greeting-box">
-      Hola <strong id="clientGreeting">Cliente</strong>, por favor verifica el detalle de tu compra antes de pagar.
-    </div>
-
-    <!-- Desglose de Productos -->
-    <div class="section-subtitle">Detalle de tu Pedido</div>
-    <div class="products-list" id="productsList">
-      <div style="padding:16px; text-align:center; color:#94a3b8; font-size:13px;">Cargando productos...</div>
-    </div>
-
-    <!-- Total a Pagar en USD y Bolívares BCV -->
-    <div class="total-highlight-card">
-      <div class="label">Total a Pagar</div>
-      
-      <div class="dual-currency-grid">
-        <div class="curr-col border-r">
-          <span class="curr-name">EN DÓLARES (USD)</span>
-          <span class="curr-val" id="totalUSD">$0.00</span>
-        </div>
-        <div class="curr-col">
-          <span class="curr-name">EN BOLÍVARES (VES)</span>
-          <span class="curr-val ves" id="totalVES">Bs. 0.00</span>
-        </div>
-      </div>
-
-      <div class="bcv-rate-tag">
-        🏛️ Cotizado a Tasa Oficial BCV: <strong id="bcvRateDisplay">Bs. 37.50 / USD</strong>
-      </div>
-    </div>
-
-    <!-- Métodos de pago disponibles -->
-    <div class="methods-pill-box">
-      <div class="method-item"><span>📱</span> Pago Móvil C2P</div>
-      <div class="method-item"><span>🏦</span> Débito Inmediato</div>
-      <div class="method-item"><span>🪙</span> Binance Pay</div>
-    </div>
-
-    <!-- Botón para Proceder al Pago con SPIDI -->
-    <button class="btn-pay-now" id="btnPaySpidi" onclick="irAPagarSpidi()">
-      💳 Proceder al Pago Seguro con SPIDI →
-    </button>
-
-    <div class="security-note">
-      🔒 <em>Pagos procesados y protegidos con el respaldo de Banco Sofitasa y SPIDI.<br>Una vez confirmado tu pago, serás redirigido a tu factura digital con el comprobante bancario para enviar tus datos de envío MRW directamente por WhatsApp a la tienda.</em>
-    </div>
-
+  <div class="loader-box">
+    <div class="spinner"></div>
+    <h2>Conectando con Skylink Pay</h2>
+    <p>Redirigiendo a la pasarela oficial de pago seguro...</p>
+    <a id="btnFallback" href="#" class="btn-direct">Continuar a Skylink Pay →</a>
   </div>
 
   <script>
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get('order_id') || params.get('ref') || '';
-    let currentOrder = null;
 
-    async function cargarOrden() {
+    async function redirectSkylink() {
       if (!orderId) {
-        alert('No se indicó el número de orden.');
+        document.querySelector('p').textContent = 'No se especificó orden de pago.';
         return;
       }
 
       try {
         const res = await fetch(`/api/order-status/${encodeURIComponent(orderId)}`);
         const json = await res.json();
-        if (!json.success || !json.data) throw new Error(json.message || 'Orden no encontrada');
-
-        currentOrder = json.data;
-
-        // Mostrar orden y cliente
-        document.getElementById('orderBadge').textContent = '#' + currentOrder.orderId;
-        document.getElementById('clientGreeting').textContent = currentOrder.clientName || 'Cliente';
-
-        // Totales y Tasa BCV
-        const amountUsd = Number(currentOrder.amount || 0);
-        const rate = Number(currentOrder.bcvRate || 37.50);
-        const amountVes = currentOrder.amountVes ? Number(currentOrder.amountVes) : Number((amountUsd * rate).toFixed(2));
-
-        document.getElementById('totalUSD').textContent = `$${amountUsd.toFixed(2)}`;
-        document.getElementById('totalVES').textContent = `Bs. ${amountVes.toFixed(2)}`;
-        document.getElementById('bcvRateDisplay').textContent = `Bs. ${rate.toFixed(2)} / USD`;
-
-        document.getElementById('btnPaySpidi').innerHTML = `
-          💳 Pagar Bs. ${amountVes.toFixed(2)} ($${amountUsd.toFixed(2)} USD) con SPIDI →
-        `;
-
-        // Renderizar productos
-        const list = document.getElementById('productsList');
-        const items = currentOrder.items || [];
-
-        if (items.length === 0) {
-          list.innerHTML = `
-            <div class="product-row">
-              <span class="product-name">${currentOrder.description || 'Orden de Compra'}</span>
-              <strong class="product-subtotal">$${amountUsd.toFixed(2)}</strong>
-            </div>
-          `;
+        if (json.success && json.data) {
+          const skylinkUrl = json.data.skylinkUrl || json.data.paymentUrl || `https://dev-axis-payment.valinkgroup.com/pay/${json.data.token}`;
+          document.getElementById('btnFallback').href = skylinkUrl;
+          window.location.replace(skylinkUrl);
         } else {
-          list.innerHTML = '';
-          items.forEach(it => {
-            const row = document.createElement('div');
-            row.className = 'product-row';
-            row.innerHTML = `
-              <div class="product-info">
-                <span class="product-qty">${it.qty}x</span>
-                <span class="product-name">${it.name}</span>
-              </div>
-              <strong class="product-subtotal">$${(it.price * it.qty).toFixed(2)}</strong>
-            `;
-            list.appendChild(row);
-          });
+          document.querySelector('p').textContent = 'Orden no encontrada o expirada.';
         }
-
-      } catch (err) {
-        document.getElementById('productsList').innerHTML = `
-          <div style="padding:16px; color:#ef4444; text-align:center;">
-            ⚠️ Error: ${err.message}
-          </div>
-        `;
+      } catch (e) {
+        document.querySelector('p').textContent = 'Error al conectar con la orden.';
       }
     }
 
-    function irAPagarSpidi() {
-      if (currentOrder && currentOrder.paymentUrl) {
-        window.location.href = currentOrder.paymentUrl;
-      } else {
-        alert('Enlace de pago no disponible');
-      }
-    }
-
-    cargarOrden();
+    redirectSkylink();
   </script>
 </body>
 </html>
