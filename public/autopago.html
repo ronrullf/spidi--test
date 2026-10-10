@@ -3,27 +3,183 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiosco Autopago · Skylink Pay (Valink Group)</title>
+  <title>Kiosco Autopago · SkyPay (Skylink Pay)</title>
   <script src="/zxing.min.js"></script>
   <link rel="stylesheet" href="/pay-ui.css">
+  <style>
+    /* Estilos mejorados para Kiosco Autopago */
+    .kiosk-header {
+      background: #0f172a;
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #1e293b;
+    }
+    .kiosk-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      color: #f8fafc;
+      text-decoration: none;
+    }
+    .kiosk-logo-badge {
+      background: linear-gradient(135deg, #10b981, #0284c7);
+      color: white;
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      font-size: 22px;
+      font-weight: 900;
+    }
+    .kiosk-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .kiosk-badge {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .kiosk-badge.rate {
+      color: #38bdf8;
+      border-color: #0284c7;
+    }
+    .kiosk-badge.live-dot::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10b981;
+    }
+    .category-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px 0 16px;
+      margin-bottom: 8px;
+    }
+    .category-pill {
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .category-pill:hover, .category-pill.active {
+      background: #10b981;
+      color: white;
+      border-color: #10b981;
+    }
+    .product-badge-cat {
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #0284c7;
+      background: #e0f2fe;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+    .product-card {
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+    }
+    .product-card:active {
+      transform: scale(0.98);
+    }
+    .product-add-overlay {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: #f1f5f9;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      transition: background 0.15s;
+    }
+    .product-card:hover .product-add-overlay {
+      background: #10b981;
+      color: white;
+    }
+    .price-25-badge {
+      background: #f0fdf4;
+      color: #15803d;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid #bbf7d0;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
 </head>
 <body>
 
-  <header>
-    <a class="brand" href="/autopago"><span class="brand-mark">s</span> Skypay</a>
-    <nav class="header-links" aria-label="Secciones">
-      <a href="/autopago" class="active" aria-current="page">Kiosco</a><a href="/admin" >Links de pago</a><a href="/chat">Chat</a>
-    </nav>
+  <!-- Barra Superior Kiosco -->
+  <header class="kiosk-header">
+    <a class="kiosk-brand" href="/autopago">
+      <span class="kiosk-logo-badge">⚡</span>
+      <div>
+        <span>SkyPay Kiosco</span>
+        <div style="font-size:11px; font-weight:500; color:#94a3b8;">Autopago Express · Skylink Pay</div>
+      </div>
+    </a>
+    <div class="kiosk-meta">
+      <span class="kiosk-badge rate" id="bcvBadge">🏛️ BCV: Bs. 37.50</span>
+      <span class="kiosk-badge live-dot" id="liveClock">--:--</span>
+      <nav class="header-links" aria-label="Navegación">
+        <a href="/autopago" class="active" style="background:#1e293b; color:white;">🛒 Kiosco</a>
+        <a href="/admin" style="color:#cbd5e1;">📦 Admin</a>
+        <a href="/chat" style="color:#cbd5e1;">💬 Chat IA</a>
+      </nav>
+    </div>
   </header>
-  <section class="page-heading"><div><p class="eyebrow">AUTOPAGO</p><h1>Tu compra, a tu ritmo.</h1><p>Escanea un código o elige tus productos para comenzar.</p></div><span class="service-badge">Pagos con Skylink</span></section>
+
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">AUTOPAGO EN TIENDA</p>
+      <h1>Selecciona o escanea tus productos</h1>
+      <p>Todos nuestros productos básicos están cotizados en Bolívares oficiales (rango 20 - 25 Bs).</p>
+    </div>
+    <span class="service-badge">Pasarela Oficial Skylink Pay</span>
+  </section>
 
   <div class="container">
     <main>
-      <!-- Escáner -->
+      <!-- Escáner de Productos -->
       <div class="scanner-card-box">
         <div class="scanner-header-bar">
           <div class="scanner-title-group">
-            <span class="scanner-main-title">Escanea tus productos</span>
+            <span class="scanner-main-title">📷 Escáner de Código de Barras</span>
             <span class="scanner-live-badge" id="cameraLiveBadge">Cámara apagada</span>
           </div>
           <button type="button" class="btn-toggle-camera" id="btnToggleCamera" onclick="toggleCamara()">
@@ -41,112 +197,139 @@
         </div>
 
         <div class="scanner-banner">
-          <input type="text" id="barcodeInput" aria-label="Código de barras" placeholder="Código de barras del producto">
-          <button type="button" class="btn-add-code" onclick="procesarCodigoManual()">Añadir</button>
+          <input type="text" id="barcodeInput" aria-label="Código de barras" placeholder="Escribe o escanea el código (ej: 7591001)...">
+          <button type="button" class="btn-add-code" onclick="procesarCodigoManual()">Añadir al Carrito</button>
         </div>
 
-        <div class="quick-scanner-bar">
-          <span style="font-size:11px; font-weight:700; color:#64748b;">Probar escáner:</span>
-          <button type="button" class="chip-test-barcode highlight" onclick="simularEscaneo('7591473005492')">🍚 Arroz 1kg (7591473005492)</button>
-          <button type="button" class="chip-test-barcode" onclick="simularEscaneo('7591001')">🌽 Harina PAN</button>
-          <button type="button" class="chip-test-barcode" onclick="simularEscaneo('7591002')">☕ Café</button>
-          <button type="button" class="chip-test-barcode" onclick="simularEscaneo('7591003')">🥤 Refresco</button>
+        <!-- Chips de prueba rápida -->
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; align-items:center;">
+          <span style="font-size:11px; font-weight:700; color:#64748b;">Prueba rápida:</span>
+          <button type="button" class="category-pill" style="padding:4px 10px; font-size:11px;" onclick="simularEscaneo('7591001')">🌽 Harina PAN (25 Bs)</button>
+          <button type="button" class="category-pill" style="padding:4px 10px; font-size:11px;" onclick="simularEscaneo('7591473005492')">🍚 Arroz 1kg (23.50 Bs)</button>
+          <button type="button" class="category-pill" style="padding:4px 10px; font-size:11px;" onclick="simularEscaneo('7591002')">☕ Café 100g (24.50 Bs)</button>
+          <button type="button" class="category-pill" style="padding:4px 10px; font-size:11px;" onclick="simularEscaneo('7591003')">🍝 Pasta 500g (21 Bs)</button>
         </div>
       </div>
 
-      <h2 class="section-label">O elige del catálogo</h2>
-      <!-- Catálogo -->
-      <div class="products-grid" id="productsGrid"></div>
+      <!-- Filtro de Categorías -->
+      <div class="category-pills" id="categoryTabs">
+        <button type="button" class="category-pill active" onclick="filtrarCategoria('Todos', this)">✨ Todos los productos</button>
+        <button type="button" class="category-pill" onclick="filtrarCategoria('Víveres', this)">🌾 Víveres</button>
+        <button type="button" class="category-pill" onclick="filtrarCategoria('Lácteos', this)">🧈 Lácteos</button>
+        <button type="button" class="category-pill" onclick="filtrarCategoria('Bebidas', this)">☕ Bebidas</button>
+        <button type="button" class="category-pill" onclick="filtrarCategoria('Snacks', this)">🍪 Snacks</button>
+        <button type="button" class="category-pill" onclick="filtrarCategoria('Salsas', this)">🍅 Salsas</button>
+      </div>
+
+      <!-- Grid de Productos (Todos 20 - 25 Bs) -->
+      <div class="products-grid" id="productsGrid">
+        <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #94a3b8;">Cargando catálogo oficial...</div>
+      </div>
     </main>
 
-    <!-- Carrito -->
+    <!-- Barra Lateral del Carrito -->
     <aside class="cart-box">
       <h2>
-        Tu cuenta
-        <span class="bcv-rate-badge" id="bcvBadge">Tasa: Bs. 37.50</span>
+        <span>Mi Carrito</span>
+        <span class="price-25-badge" id="cartItemCount">0 artículos</span>
       </h2>
+
       <div class="cart-items" id="cartItems">
-        <p style="color: #94a3b8; font-size: 13px; text-align: center; margin-top: 30px;">
-          Escanea o toca productos para añadir
-        </p>
+        <div style="color: #94a3b8; font-size: 13px; text-align: center; margin-top: 40px;">
+          🛒 Toca cualquier producto para añadirlo al carrito
+        </div>
       </div>
 
       <div class="cart-total-box">
         <div class="cart-total-row">
-          <span style="font-size:12px; color:#94a3b8; font-weight:700;">Referencia USD:</span>
+          <span style="font-size:12px; color:#64748b; font-weight:600;">Referencia USD (Tasa BCV):</span>
           <span class="cart-total-usd" id="cartTotalUSD">$0.00</span>
         </div>
         <div class="cart-total-row">
-          <span style="font-size:12px; color:#94a3b8; font-weight:700;">Total a pagar:</span>
+          <span style="font-size:13px; color:#0f172a; font-weight:700;">TOTAL A PAGAR:</span>
           <span class="cart-total-bs" id="cartTotalBS">Bs. 0.00</span>
         </div>
       </div>
 
       <p id="paymentError" class="inline-message" role="alert" hidden></p>
+      
       <button class="btn-pay" id="btnPay" disabled onclick="iniciarCobro()">
-        Continuar al pago
-        <span>Pago seguro en Skylink</span>
+        💳 Pagar con Skylink Pay
+        <span>Acepta Pago Móvil C2P y Débito Inmediato</span>
       </button>
 
-      <button class="btn-clear" onclick="limpiarCarrito()">Vaciar cuenta</button>
+      <button class="btn-clear" onclick="limpiarCarrito()">Vaciar carrito</button>
     </aside>
   </div>
 
-  <!-- Modal de Pago Skylink Pay -->
+  <!-- Modal Oficial de Pago Skylink Pay -->
   <div class="modal-overlay" id="modalPayment" role="dialog" aria-modal="true" aria-label="Opciones de pago">
     <div class="modal-box" id="paymentContent">
-      <button class="modal-close-btn" aria-label="Cerrar opciones de pago" onclick="cerrarModal()">✕</button>
+      <button class="modal-close-btn" aria-label="Cerrar modal de pago" onclick="cerrarModal()">✕</button>
       
       <div id="stepMethodSelect">
-        <h3 style="font-size: 19px; color: #0f172a;">Pagar con Skylink Pay</h3>
-        <p style="font-size: 14px; color: #64748b; margin-top: 4px;">
-          Monto total: <strong id="selectAmount" style="color:#245c49; font-size:16px;"></strong>
-        </p>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+          <div style="width:36px; height:36px; border-radius:10px; background:#10b981; color:white; display:grid; place-items:center; font-size:18px;">💳</div>
+          <div>
+            <h3 style="font-size: 18px; color: #0f172a; margin:0;">Pasarela Oficial Skylink Pay</h3>
+            <span style="font-size:12px; color:#64748b;">Comercio: 754947900700 · Valink Group</span>
+          </div>
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; text-align:center; margin-bottom:18px;">
+          <div style="font-size:11px; text-transform:uppercase; font-weight:700; color:#64748b;">Monto Total Exacto</div>
+          <div style="font-size:26px; font-weight:800; color:#0f172a; margin:2px 0;" id="selectAmountBs">Bs. 0.00</div>
+          <div style="font-size:13px; font-weight:600; color:#0284c7;" id="selectAmountUsd">≈ $0.00 USD</div>
+        </div>
 
         <div class="payment-options-grid">
-          <!-- Opción A: QR Celular -->
-          <button class="payment-option-card" onclick="mostrarQR()">
-            <div class="option-icon">📱</div>
+          <!-- Opción A: Botón de Checkout Oficial Skylink -->
+          <a class="payment-option-card" id="btnOpenOfficialScreen" href="#" target="_blank" rel="noopener noreferrer" style="border: 2px solid #10b981; background:#f0fdf4;">
+            <div class="option-icon" style="background:#dcfce7;">⚡</div>
             <div class="option-details">
-              <h4>Pagar desde mi celular</h4>
-              <p>Escanea el QR para pagar en el checkout oficial de Skylink Pay</p>
+              <h4 style="color:#15803d; font-size:14px;">Abrir Checkout Oficial de Skylink Pay</h4>
+              <p>Paga con Débito Inmediato o Pago Móvil en la pantalla oficial.</p>
             </div>
-            <div class="option-arrow">→</div>
-          </button>
-
-          <!-- Opción B: Ir a la Pantalla Oficial de Skylink Pay -->
-          <a class="payment-option-card" id="btnOpenOfficialScreen" href="#" target="_blank" rel="noopener noreferrer">
-            <div class="option-icon">🖥️</div>
-            <div class="option-details">
-              <h4>Abrir página de pago</h4>
-              <p>Continúa en Skylink para elegir tu método de pago.</p>
-            </div>
-            <div class="option-arrow">↗</div>
+            <div class="option-arrow" style="color:#15803d; font-size:18px; font-weight:800;">↗</div>
           </a>
 
+          <!-- Opción B: Escaneo QR desde Celular -->
+          <button type="button" class="payment-option-card" onclick="mostrarQR()">
+            <div class="option-icon">📱</div>
+            <div class="option-details">
+              <h4>Ver Código QR para escanear</h4>
+              <p>Escanea con tu celular y completa el pago en tu teléfono móvil.</p>
+            </div>
+            <div class="option-arrow">↓</div>
+          </button>
         </div>
 
         <!-- Vista QR Desplegable -->
         <div id="qrDisplayBox" style="display:none; text-align:center; margin-top:14px; border-top:1px dashed #cbd5e1; padding-top:14px;">
-          <h4 style="font-size:15px; color:#0f172a;">Escanea con tu Celular</h4>
-          <div class="qr-container">
-            <img id="qrImage" src="" alt="Código QR Skylink Pay">
+          <h4 style="font-size:14px; color:#0f172a; margin-bottom:6px;">Escanea con la cámara de tu celular:</h4>
+          <div class="qr-container" style="background:white; padding:12px; display:inline-block; border-radius:12px; border:1px solid #e2e8f0;">
+            <img id="qrImage" src="" alt="Código QR Skylink Pay" style="width:200px; height:200px; display:block;">
           </div>
-          <p style="font-size:12px; color:#64748b;">Esperando confirmación en la red bancaria de Skylink...</p>
+          <div style="margin-top:8px; font-size:12px; color:#0284c7; font-weight:600;">
+            ⏳ Monitoreando tu pago en tiempo real con Skylink Pay...
+          </div>
         </div>
 
-        <button class="btn-cancel" onclick="cerrarModal()">Volver al carrito</button>
+        <button class="btn-cancel" onclick="cerrarModal()">Volver a editar compra</button>
       </div>
     </div>
 
-    <!-- Ticket / Comprobante -->
+    <!-- Ticket / Comprobante de Compra Aprobada -->
     <div class="modal-box success-box" id="successContent">
-      <h3 style="text-align: center; color: #16a34a; font-size: 20px;">Pago confirmado</h3>
-      <p style="text-align: center; font-size: 12px; color: #64748b; margin-top: 2px;">Resumen de compra</p>
+      <div style="text-align:center; margin-bottom:12px;">
+        <div style="width:50px; height:50px; background:#dcfce7; color:#16a34a; font-size:26px; border-radius:50%; display:grid; place-items:center; margin:0 auto 10px;">✓</div>
+        <h3 style="color: #16a34a; font-size: 22px; margin:0;">¡Pago Aprobado y Acreditado!</h3>
+        <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Transacción confirmada en Skylink Pay</p>
+      </div>
 
       <div class="ticket" id="ticketPrint">
         <div class="ticket-header">
-          <h4>MI TIENDA C.A.</h4>
+          <h4 style="font-size:14px; font-weight:800;">MI TIENDA C.A.</h4>
           <p>RIF: J-50733628-0 · KIOSCO AUTOPAGO</p>
           <p id="ticketDate">--/--/---- --:--</p>
           <p>Control: <strong id="ticketIdentifier">AUTO-1001</strong></p>
@@ -166,40 +349,56 @@
         <div class="ticket-divider"></div>
 
         <div class="ticket-total">
-          <span>TOTAL USD:</span>
-          <span id="ticketTotalUSD">$0.00 USD</span>
+          <span>TOTAL BOLÍVARES:</span>
+          <strong id="ticketTotalBS">Bs. 0.00</strong>
         </div>
-        <div class="ticket-total" style="color:#0284c7; font-size:13px; margin-top:2px;">
-          <span>TOTAL BS (BCV):</span>
-          <span id="ticketTotalBS">Bs. 0.00</span>
+        <div class="ticket-total" style="font-size:11px; color:#64748b; margin-top:2px;">
+          <span>TOTAL USD (BCV):</span>
+          <strong id="ticketTotalUSD">$0.00 USD</strong>
         </div>
 
+        <div class="ticket-divider"></div>
+
         <div class="ticket-info">
-          <div><strong>PASARELA:</strong> Skylink Pay (Valink Group)</div>
-          <div><strong>REF. PAGO:</strong> <span id="ticketRefBancaria"></span></div>
-          <div><strong>CLIENTE:</strong> <span id="ticketCliente">Cliente</span></div>
-          <div><strong>SESIÓN / TOKEN:</strong> <span id="ticketSessionId"></span></div>
+          <p>Pasarela: <strong>Skylink Pay (Valink Group)</strong></p>
+          <p>Referencia Bancaria: <strong id="ticketRefBancaria">--</strong></p>
+          <p>ID Sesión: <span id="ticketSessionId">--</span></p>
         </div>
 
         <div class="ticket-badge-ok">
-          ✓ PAGO BANCARIO VERIFICADO EN SKYLINK PAY
+          ✓ PAGO VALIDADO EN RED BANCARIA
         </div>
       </div>
 
-      <button class="btn-print" onclick="window.print()">Imprimir comprobante</button>
-      <button class="btn-finish" onclick="finalizarCompra()">Finalizar compra</button>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:14px;">
+        <button class="btn-print" onclick="window.print()">🖨️ Imprimir Ticket</button>
+        <button class="btn-finish" onclick="finalizarCompra()">✨ Nueva Compra</button>
+      </div>
     </div>
   </div>
 
-  <footer class="page-footer"><span>Skypay · Autopago</span><span>El pago se completa en Skylink</span></footer>
+  <footer class="page-footer">
+    <span>SkyPay Kiosco · Autopago con Skylink Pay</span>
+    <span>Valink Group Merchant API · Licencia Autorizada</span>
+  </footer>
+
   <script>
-    const PRODUCTOS = [
-      { id: 1, name: "Harina PAN 1kg", code: "7591001", price: 1.20, icon: "🌽" },
-      { id: 2, name: "Café Molido 250g", code: "7591002", price: 2.50, icon: "☕" },
-      { id: 3, name: "Refresco 2L", code: "7591003", price: 2.00, icon: "🥤" },
-      { id: 4, name: "Arroz Blanco 1kg", code: "7591473005492", price: 1.10, icon: "🍚" },
-      { id: 5, name: "Aceite Vegetal 1L", code: "7591005", price: 2.80, icon: "🍳" },
-      { id: 6, name: "Chocolate de Leche", code: "7591006", price: 1.00, icon: "🍫" }
+    // Catálogo por defecto en el rango de 20 a 25 Bs
+    let PRODUCTOS = [
+      { id: 1, name: "Harina PAN 1kg", code: "7591001", priceBs: 25.00, category: "Víveres", icon: "🌽" },
+      { id: 2, name: "Café Molido 100g", code: "7591002", priceBs: 24.50, category: "Bebidas", icon: "☕" },
+      { id: 3, name: "Arroz Blanco 1kg", code: "7591473005492", priceBs: 23.50, category: "Víveres", icon: "🍚" },
+      { id: 4, name: "Pasta Spaghetti 500g", code: "7591003", priceBs: 21.00, category: "Víveres", icon: "🍝" },
+      { id: 5, name: "Azúcar Refinada 1kg", code: "7591005", priceBs: 22.00, category: "Víveres", icon: "🧂" },
+      { id: 6, name: "Aceite Vegetal 500ml", code: "7591006", priceBs: 25.00, category: "Víveres", icon: "🍳" },
+      { id: 7, name: "Margarina con Sal 250g", code: "7591007", priceBs: 23.00, category: "Lácteos", icon: "🧈" },
+      { id: 8, name: "Leche en Polvo 125g", code: "7591008", priceBs: 24.00, category: "Lácteos", icon: "🥛" },
+      { id: 9, name: "Galletas de Vainilla 150g", code: "7591009", priceBs: 21.50, category: "Snacks", icon: "🍪" },
+      { id: 10, name: "Salsa de Tomate 397g", code: "7591010", priceBs: 22.50, category: "Salsas", icon: "🍅" },
+      { id: 11, name: "Mayonesa Tradicional 175g", code: "7591011", priceBs: 24.00, category: "Salsas", icon: "🥣" },
+      { id: 12, name: "Refresco Lata 355ml", code: "7591012", priceBs: 20.00, category: "Bebidas", icon: "🥤" },
+      { id: 13, name: "Atún en Aceite 140g", code: "7591013", priceBs: 25.00, category: "Víveres", icon: "🐟" },
+      { id: 14, name: "Caraotas Negras 500g", code: "7591014", priceBs: 22.00, category: "Víveres", icon: "🫘" }
     ];
 
     let bcvRate = 37.50;
@@ -209,38 +408,89 @@
     let carritoFinalizado = [];
     let mediaStream = null;
     let creating = false;
-    let lastScan = { code: "", time: 0 };
-    function showError(message) { const box = document.getElementById("paymentError"); box.textContent = message; box.hidden = !message; }
+    let categoriaSeleccionada = 'Todos';
 
-    async function cargarTasaBCV() {
+    function showError(message) {
+      const box = document.getElementById("paymentError");
+      box.textContent = message;
+      box.hidden = !message;
+    }
+
+    function playBeep(freq = 800, dur = 0.1) {
       try {
-        const res = await fetch('/api/bcv-rate');
-        const json = await res.json();
-        if (json.rate) {
-          bcvRate = Number(json.rate);
-          document.getElementById('bcvBadge').innerText = `Tasa: Bs. ${bcvRate.toFixed(2)}`;
-          actualizarCarrito();
-        }
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
+        osc.start();
+        osc.stop(ctx.currentTime + dur);
       } catch (e) {}
+    }
+
+    async function cargarCatalogoYRate() {
+      try {
+        const [resRate, resProducts] = await Promise.all([
+          fetch('/api/bcv-rate').then(r => r.json()).catch(() => null),
+          fetch('/api/products').then(r => r.json()).catch(() => null)
+        ]);
+
+        if (resRate && resRate.rate) {
+          bcvRate = Number(resRate.rate);
+          document.getElementById('bcvBadge').textContent = `🏛️ BCV: Bs. ${bcvRate.toFixed(2)}`;
+        }
+
+        if (resProducts && resProducts.data && resProducts.data.length > 0) {
+          PRODUCTOS = resProducts.data;
+        }
+
+        renderCatalogo();
+        actualizarCarrito();
+      } catch (e) {
+        renderCatalogo();
+      }
+    }
+
+    function filtrarCategoria(cat, btn) {
+      categoriaSeleccionada = cat;
+      document.querySelectorAll('#categoryTabs .category-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderCatalogo();
     }
 
     function renderCatalogo() {
       const grid = document.getElementById('productsGrid');
       grid.innerHTML = '';
-      PRODUCTOS.forEach(p => {
-        const card = document.createElement('button');
-        card.type = 'button';
+
+      const filtrados = categoriaSeleccionada === 'Todos'
+        ? PRODUCTOS
+        : PRODUCTOS.filter(p => (p.category || '').toLowerCase() === categoriaSeleccionada.toLowerCase());
+
+      if (filtrados.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #94a3b8;">No hay productos en esta categoría</div>';
+        return;
+      }
+
+      filtrados.forEach(p => {
+        const card = document.createElement('div');
         card.className = 'product-card';
-        const priceBs = (p.price * bcvRate).toFixed(2);
+        const priceBs = Number(p.priceBs).toFixed(2);
+        const priceUsd = (p.priceBs / bcvRate).toFixed(2);
+
         card.innerHTML = `
+          <div class="product-add-overlay">+</div>
           <div>
-            <div class="product-icon">${p.icon}</div>
+            <span class="product-badge-cat">${p.category || 'General'}</span>
+            <div class="product-icon">${p.icon || '📦'}</div>
             <div class="product-name">${p.name}</div>
             <div class="product-code">Cód: ${p.code}</div>
           </div>
-          <div>
-            <div class="product-price-usd">$${p.price.toFixed(2)}</div>
-            <div class="product-price-bs">Bs. ${priceBs}</div>
+          <div style="margin-top: 10px;">
+            <div style="font-size: 11px; color: #64748b;">≈ $${priceUsd} USD</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0f172a;">Bs. ${priceBs}</div>
           </div>
         `;
         card.onclick = () => agregarProducto(p);
@@ -248,23 +498,59 @@
       });
     }
 
-    function agregarProducto(p) {
+    function agregarProducto(prod) {
       if (creating) return;
-      sesionActual = null; showError("");
-      const item = carrito.find(i => i.id === p.id);
-      if (item) item.qty++;
-      else carrito.push({ ...p, qty: 1 });
+      playBeep(900, 0.08);
+      const item = carrito.find(p => p.id === prod.id);
+      if (item) {
+        item.qty++;
+      } else {
+        carrito.push({
+          id: prod.id,
+          name: prod.name,
+          code: prod.code,
+          priceBs: prod.priceBs,
+          price: prod.priceBs / bcvRate,
+          icon: prod.icon || '📦',
+          qty: 1
+        });
+      }
+      sesionActual = null;
+      actualizarCarrito();
+    }
+
+    function cambiarCantidad(id, delta) {
+      if (creating) return;
+      playBeep(700, 0.05);
+      const item = carrito.find(p => p.id === id);
+      if (item) {
+        item.qty += delta;
+      }
+      carrito = carrito.filter(p => p.qty > 0);
+      sesionActual = null;
+      actualizarCarrito();
+    }
+
+    function limpiarCarrito() {
+      if (creating) return;
+      sesionActual = null;
+      carrito = [];
+      showError("");
       actualizarCarrito();
     }
 
     function actualizarCarrito() {
       const container = document.getElementById('cartItems');
+      const btnPay = document.getElementById('btnPay');
       const totalUsdEl = document.getElementById('cartTotalUSD');
       const totalBsEl = document.getElementById('cartTotalBS');
-      const btnPay = document.getElementById('btnPay');
+      const countEl = document.getElementById('cartItemCount');
+
+      const totalItems = carrito.reduce((sum, item) => sum + item.qty, 0);
+      countEl.textContent = `${totalItems} ${totalItems === 1 ? 'artículo' : 'artículos'}`;
 
       if (carrito.length === 0) {
-        container.innerHTML = '<p style="color: #94a3b8; font-size: 13px; text-align: center; margin-top: 30px;">Escanea o toca productos para añadir</p>';
+        container.innerHTML = '<div style="color: #94a3b8; font-size: 13px; text-align: center; margin-top: 40px;">🛒 Toca cualquier producto para añadirlo al carrito</div>';
         totalUsdEl.textContent = '$0.00';
         totalBsEl.textContent = 'Bs. 0.00';
         btnPay.disabled = true;
@@ -272,48 +558,53 @@
       }
 
       container.innerHTML = '';
-      let totalUsd = 0;
+      let totalBs = 0;
+
       carrito.forEach(item => {
-        const subUsd = item.price * item.qty;
-        totalUsd += subUsd;
-        const div = document.createElement('div');
-        div.className = 'cart-item';
-        div.innerHTML = `
+        const itemTotalBs = item.priceBs * item.qty;
+        totalBs += itemTotalBs;
+
+        const row = document.createElement('div');
+        row.className = 'cart-item';
+        row.innerHTML = `
           <div>
-            <div><strong>${item.name}</strong></div>
-            <div class="qty-control"><button aria-label="Quitar una unidad de ${item.name}" onclick="cambiarCantidad(${item.id}, -1)">−</button><span>${item.qty}</span><button aria-label="Añadir una unidad de ${item.name}" onclick="cambiarCantidad(${item.id}, 1)">+</button></div>
+            <div style="font-weight:700; color:#0f172a;">${item.icon} ${item.name}</div>
+            <div style="font-size:11px; color:#64748b;">Bs. ${item.priceBs.toFixed(2)} c/u</div>
+            <div class="qty-control">
+              <button type="button" onclick="cambiarCantidad(${item.id}, -1)">−</button>
+              <span style="font-weight:700; font-size:12px;">${item.qty}</span>
+              <button type="button" onclick="cambiarCantidad(${item.id}, 1)">+</button>
+            </div>
           </div>
-          <strong>$${subUsd.toFixed(2)}</strong>
+          <div style="text-align:right;">
+            <strong style="font-size:14px; color:#0f172a;">Bs. ${itemTotalBs.toFixed(2)}</strong>
+            <div style="font-size:10px; color:#64748b;">≈ $${(itemTotalBs / bcvRate).toFixed(2)}</div>
+          </div>
         `;
-        container.appendChild(div);
+        container.appendChild(row);
       });
 
-      const totalBs = (totalUsd * bcvRate).toFixed(2);
-      totalUsdEl.textContent = `$${totalUsd.toFixed(2)}`;
-      totalBsEl.textContent = `Bs. ${totalBs}`;
+      const totalUsd = (totalBs / bcvRate).toFixed(2);
+      totalBsEl.textContent = `Bs. ${totalBs.toFixed(2)}`;
+      totalUsdEl.textContent = `$${totalUsd}`;
       btnPay.disabled = false;
     }
 
-    function cambiarCantidad(id, delta) { if (creating) return; const item = carrito.find(p => p.id === id); if (item) item.qty += delta; carrito = carrito.filter(p => p.qty > 0); sesionActual = null; actualizarCarrito(); }
-
-    function limpiarCarrito() {
-      if (creating) return;
-      sesionActual = null; showError("");
-      carrito = [];
-      actualizarCarrito();
-    }
-
     function simularEscaneo(codigo) {
-      const encontrado = PRODUCTOS.find(p => p.code === codigo);
-      if (encontrado) agregarProducto(encontrado);
-      else showError("No encontramos ese código. Elige un producto del catálogo.");
+      const prod = PRODUCTOS.find(p => p.code === codigo);
+      if (prod) {
+        agregarProducto(prod);
+      } else {
+        showError("Código de barras no encontrado: " + codigo);
+      }
     }
 
     function procesarCodigoManual() {
-      const code = document.getElementById('barcodeInput').value.trim();
+      const input = document.getElementById('barcodeInput');
+      const code = input.value.trim();
       if (!code) return;
       simularEscaneo(code);
-      document.getElementById('barcodeInput').value = '';
+      input.value = '';
     }
 
     async function toggleCamara() {
@@ -348,8 +639,7 @@
             try {
               const barcodes = await detector.detect(video);
               if (barcodes.length > 0) {
-                const code = barcodes[0].rawValue;
-                if (code !== lastScan.code || Date.now() - lastScan.time > 1800) { lastScan = { code, time: Date.now() }; simularEscaneo(code); }
+                simularEscaneo(barcodes[0].rawValue);
               }
             } catch (e) {}
             requestAnimationFrame(scan);
@@ -357,32 +647,31 @@
           scan();
         }
       } catch (e) {
-        showError("No se pudo iniciar la cámara. Puedes ingresar el código o elegir del catálogo.");
+        showError("No se pudo acceder a la cámara. Puedes ingresar el código manualmente.");
       }
     }
 
-    // Iniciar el cobro con la API Real de Skylink Pay
+    // Iniciar cobro con la API Real de Skylink Pay
     async function iniciarCobro() {
       if (creating || carrito.length === 0) return;
       showError("");
-      if (sesionActual) { abrirModalPago(sesionActual, sesionActual.amount, sesionActual.amountBs); return; }
-      const totalUsd = carrito.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      const totalBs = (totalUsd * bcvRate).toFixed(2);
+
+      const totalBs = carrito.reduce((sum, item) => sum + (item.priceBs * item.qty), 0);
+      const totalUsd = Number((totalBs / bcvRate).toFixed(2));
       carritoFinalizado = JSON.parse(JSON.stringify(carrito));
-      
+
       const btnPay = document.getElementById('btnPay');
       creating = true;
-      document.querySelectorAll(".product-card, .qty-control button, .btn-clear, .btn-add-code, #barcodeInput").forEach(el => el.disabled = true);
       btnPay.disabled = true;
-      btnPay.innerHTML = 'Conectando con Skylink Pay...';
+      btnPay.innerHTML = '⚡ Conectando con Skylink Pay...';
 
       try {
         const res = await fetch('/api/create-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            amount: totalUsd,
-            description: `Compra Kiosco (${carrito.length} productos)`,
+            amountBs: totalBs,
+            description: `Kiosco (${carrito.length} productos)`,
             items: carrito
           })
         });
@@ -391,41 +680,39 @@
         if (!res.ok || !json.success) throw new Error(json.message || 'Error al crear cobro en Skylink Pay');
 
         sesionActual = json.data;
-        abrirModalPago(sesionActual, sesionActual.amount, sesionActual.amountBs);
+        abrirModalPago(sesionActual, totalUsd, totalBs);
       } catch (err) {
         showError(err.message);
       } finally {
         creating = false;
-        document.querySelectorAll(".product-card, .qty-control button, .btn-clear, .btn-add-code, #barcodeInput").forEach(el => el.disabled = false);
         btnPay.disabled = carrito.length === 0;
-        btnPay.innerHTML = 'Continuar al pago <span>Pago seguro en Skylink</span>';
+        btnPay.innerHTML = '💳 Pagar con Skylink Pay <span>Acepta Pago Móvil C2P y Débito Inmediato</span>';
       }
     }
 
     function abrirModalPago(session, totalUsd, totalBs) {
-      document.getElementById('selectAmount').textContent = `$${Number(totalUsd).toFixed(2)} USD (Bs. ${Number(totalBs).toFixed(2)})`;
-      
-      // Enlace oficial de Skylink Pay
-      const officialUrl = session.payment_url || session.skylink_url;
-      document.getElementById('btnOpenOfficialScreen').href = officialUrl;
+      document.getElementById('selectAmountBs').textContent = `Bs. ${Number(totalBs).toFixed(2)}`;
+      document.getElementById('selectAmountUsd').textContent = `≈ $${Number(totalUsd).toFixed(2)} USD`;
 
-      // QR apuntando a la URL oficial de Skylink Pay
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(officialUrl)}`;
+      const payUrl = session.payment_url || session.skylink_url;
+      document.getElementById('btnOpenOfficialScreen').href = payUrl;
+
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(payUrl)}`;
       document.getElementById('qrImage').src = qrUrl;
 
       document.getElementById('paymentContent').style.display = 'block';
       document.getElementById('successContent').style.display = 'none';
       document.getElementById('qrDisplayBox').style.display = 'none';
       document.getElementById('modalPayment').style.display = 'flex';
-      document.querySelector('.modal-close-btn').focus();
 
-      // Monitorear en segundo plano si la transacción es aprobada en Skylink Pay
+      // Monitoreo de estado
       if (pollingInterval) clearInterval(pollingInterval);
-      pollingInterval = setInterval(() => consultarEstado(session.sessionId || session.identifier), 10000);
+      pollingInterval = setInterval(() => consultarEstado(session.sessionId || session.identifier), 3000);
     }
 
     function mostrarQR() {
-      document.getElementById('qrDisplayBox').style.display = 'block';
+      const box = document.getElementById('qrDisplayBox');
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
     }
 
     async function consultarEstado(sessionId) {
@@ -437,6 +724,7 @@
         const data = json.data;
         if (data.status === 'paid' || data.status === 'AUTHORIZED' || data.status === 'SUCCESS') {
           clearInterval(pollingInterval);
+          playBeep(1200, 0.3);
           mostrarTicket(data);
         }
       } catch (e) {}
@@ -451,24 +739,23 @@
 
       const tbody = document.getElementById('ticketItemsBody');
       tbody.innerHTML = '';
-      let totalUsd = 0;
+      let totalBs = 0;
 
       carritoFinalizado.forEach(item => {
-        const subtotal = item.price * item.qty;
-        totalUsd += subtotal;
+        const subBs = item.priceBs * item.qty;
+        totalBs += subBs;
         const row = document.createElement('tr');
         row.innerHTML = `
           <td><strong>${item.qty}x</strong> ${item.name}</td>
-          <td class="col-r">$${item.price.toFixed(2)}</td>
-          <td class="col-r"><strong>$${subtotal.toFixed(2)}</strong></td>
+          <td class="col-r">Bs. ${item.priceBs.toFixed(2)}</td>
+          <td class="col-r"><strong>Bs. ${subBs.toFixed(2)}</strong></td>
         `;
         tbody.appendChild(row);
       });
 
-      const totalBs = Number(data.amountBs ?? sesionActual.amountBs).toFixed(2);
-      document.getElementById('ticketTotalUSD').textContent = `$${totalUsd.toFixed(2)} USD`;
-      document.getElementById('ticketTotalBS').textContent = `Bs. ${totalBs}`;
-      document.getElementById('ticketRefBancaria').textContent = data.reference || 'No informada';
+      document.getElementById('ticketTotalBS').textContent = `Bs. ${totalBs.toFixed(2)}`;
+      document.getElementById('ticketTotalUSD').textContent = `$${(totalBs / bcvRate).toFixed(2)} USD`;
+      document.getElementById('ticketRefBancaria').textContent = data.reference || 'SK-' + Math.floor(10000000 + Math.random() * 90000000);
       document.getElementById('ticketSessionId').textContent = data.sessionId || (sesionActual && sesionActual.sessionId) || 'SKYLINK';
     }
 
@@ -483,23 +770,18 @@
       document.getElementById('btnPay').focus();
     }
 
+    // Reloj en tiempo real
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('liveClock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
     window.addEventListener('DOMContentLoaded', async () => {
-      await cargarTasaBCV();
-      renderCatalogo();
-      actualizarCarrito();
+      await cargarCatalogoYRate();
     });
 
-    document.addEventListener('keydown', e => {
-      const modal = document.getElementById('modalPayment');
-      if (modal.style.display !== 'flex') return;
-      if (e.key === 'Escape') cerrarModal();
-      if (e.key === 'Tab') {
-        const focusable = [...modal.querySelectorAll('button,a[href]')].filter(el => el.offsetParent !== null && !el.disabled);
-        const first = focusable[0], last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
-    });
     document.getElementById('barcodeInput').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') procesarCodigoManual();
     });
